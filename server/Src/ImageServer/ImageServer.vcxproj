@@ -155,7 +155,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="GRABBING\Grabbing.cpp" />
+    <ClCompile Include="GUI\GUICommunication.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="PROCESSING\Processing.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GRABBING\Grabbing.h" />
+    <ClInclude Include="GUI\GUICommunication.h" />
+    <ClInclude Include="PROCESSING\Processing.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
