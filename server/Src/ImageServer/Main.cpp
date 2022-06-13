@@ -6,7 +6,19 @@
 #include <boost/version.hpp>
 #include <nlohmann/json.hpp>
 #include <websocket/version.hpp>
+
 #include <iostream>
+#include <Windows.h>
+#include <WinUser.h>
+
+
+std::mutex EscFlagMutex;
+bool EscFlag = false;
+bool checkEscRequest()
+{
+	std::lock_guard<std::mutex> guard(EscFlagMutex);
+	return EscFlag;
+}
 
 int main()
 {
@@ -14,6 +26,31 @@ int main()
     std::cout << "USING BOOST VERSION: " << BOOST_LIB_VERSION << "\n";
     std::cout << "USING NLOHMANN JSON VERSION: " << NLOHMANN_JSON_VERSION_MAJOR << "." << NLOHMANN_JSON_VERSION_MINOR << "." << NLOHMANN_JSON_VERSION_PATCH << "\n";
     std::cout << "USING WEBSOCKET VERSION: " << websocketpp::user_agent << "\n";
+
+	std::thread aspettaESC([&]() {
+		// WAIT for the ESC key and then set the EscFlag to stop execution
+		while (GetAsyncKeyState(VK_ESCAPE) == 0) {
+
+			Sleep(200);
+		}
+		std::cout << "--> Premuto ESC\n";
+		EscFlagMutex.lock();
+		EscFlag = true;
+		EscFlagMutex.unlock();
+		std::cout << "--> ESC Thread finito\n";
+		});
+    Grabbing* grabber = new Grabbing();
+    Processing* processer = new Processing();
+
+	while (checkEscRequest() == false)
+	{
+
+	}
+
+	std::cout << "[MAIN]: Applicazione finita\n";
+	aspettaESC.join();
+	delete processer;
+	delete grabber;
 
     return 0;
 }
