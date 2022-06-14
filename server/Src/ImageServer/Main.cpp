@@ -10,6 +10,7 @@
 #include <iostream>
 #include <Windows.h>
 #include <WinUser.h>
+#include <filesystem>
 
 
 std::mutex EscFlagMutex;
@@ -20,6 +21,12 @@ bool checkEscRequest()
 	return EscFlag;
 }
 
+std::string referenceImageFolder()
+{
+	std::filesystem::path referenceImageFolder("C:\\GitHub\\VIM-MarzoccoSofware\\server\\Res\\image.tiff");
+	return referenceImageFolder.string();
+
+}
 int main()
 {
     std::cout << "USING CV VERSION: " << cv::getVersionString() << "\n";
@@ -42,15 +49,21 @@ int main()
     Grabbing* grabber = new Grabbing();
     Processing* processer = new Processing();
 
-	while (checkEscRequest() == false)
-	{
+	std::string image_path = referenceImageFolder();
+	grabber->loadPath(image_path);
+	grabber->setImageFileMode(true);
 
-	}
+	//if(!grabber->getImageFileMode())
+		while (checkEscRequest() == false)
+		{
+			
+		}
 
-	std::cout << "[MAIN]: Applicazione finita\n";
-	aspettaESC.join();
+
+	std::cout << "\n\n[MAIN]: Applicazione finita\n\n";
 	delete processer;
 	delete grabber;
+	aspettaESC.join();
 
     return 0;
 }
