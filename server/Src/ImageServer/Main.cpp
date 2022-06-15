@@ -1,6 +1,7 @@
 #include "GRABBING/Grabbing.h"
 #include "PROCESSING/Processing.h"
 #include "GUI/GUICommunication.h"
+#include "CHECKING/Checking.h"
 
 #include <opencv2/opencv.hpp>
 #include <boost/version.hpp>
@@ -33,10 +34,15 @@ int main()
     std::cout << "USING BOOST VERSION: " << BOOST_LIB_VERSION << "\n";
     std::cout << "USING NLOHMANN JSON VERSION: " << NLOHMANN_JSON_VERSION_MAJOR << "." << NLOHMANN_JSON_VERSION_MINOR << "." << NLOHMANN_JSON_VERSION_PATCH << "\n";
     std::cout << "USING WEBSOCKET VERSION: " << websocketpp::user_agent << "\n";
+		
+	bool checkFileMode = true;
 
 	std::thread aspettaESC([&]() {
 		// WAIT for the ESC key and then set the EscFlag to stop execution
 		while (GetAsyncKeyState(VK_ESCAPE) == 0) {
+
+			if (checkEscRequest())
+				return;
 
 			Sleep(200);
 		}
@@ -47,21 +53,31 @@ int main()
 		std::cout << "--> ESC Thread finito\n";
 		});
     Grabbing* grabber = new Grabbing();
+	Checking* checker = new Checking();
     Processing* processer = new Processing();
 
 	std::string image_path = referenceImageFolder();
 	grabber->loadPath(image_path);
-	grabber->setImageFileMode(true);
+	grabber->setImageFileMode(checkFileMode);
 
-	//if(!grabber->getImageFileMode())
-		while (checkEscRequest() == false)
-		{
-			
-		}
+	
+	while (checkEscRequest() == false)
+	{
 
+		if (checkFileMode)
+			EscFlag = true;
 
+		cv::Mat imageGrabberWait = grabber->imageWait(3000);
+		checker->setImage(imageGrabberWait);
+
+		cv::Mat imageCheckerWait = checker->imageWait(3000);
+
+	}
+
+	
 	std::cout << "\n\n[MAIN]: Applicazione finita\n\n";
 	delete processer;
+	delete checker;
 	delete grabber;
 	aspettaESC.join();
 

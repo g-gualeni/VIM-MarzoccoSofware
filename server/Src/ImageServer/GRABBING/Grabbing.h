@@ -16,7 +16,6 @@ public:
 
 	bool isImageFileMode();
 	void setImageFileMode(bool fileMode);
-	bool getImageFileMode();
 	void loadPath(std::string imageFilePath);
 
 	cv::Mat imageWait(int timeout_ms);
@@ -27,7 +26,7 @@ private:
 	void loadImagesFromDisk();
 	void loadImagesFromCamera();
 
-	cv::Mat conversione(cv::Mat img);
+	
 private:
 	std::mutex m_stop_mutex;
 	bool m_stop_flag = false;

@@ -155,12 +155,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CHECKING\Checking.cpp" />
+    <ClCompile Include="GEOMETRY\GeometricCircle.cpp" />
     <ClCompile Include="GRABBING\Grabbing.cpp" />
     <ClCompile Include="GUI\GUICommunication.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="PROCESSING\Processing.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CHECKING\Checking.h" />
+    <ClInclude Include="GEOMETRY\GeometricCircle.h" />
     <ClInclude Include="GRABBING\Grabbing.h" />
     <ClInclude Include="GUI\GUICommunication.h" />
     <ClInclude Include="PROCESSING\Processing.h" />

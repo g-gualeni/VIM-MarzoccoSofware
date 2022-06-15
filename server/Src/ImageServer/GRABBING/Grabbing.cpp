@@ -28,7 +28,7 @@ void Grabbing::stopAndWait()
 	m_stop_flag = true;
 	m_stop_mutex.unlock();
 	m_thread->join();
-	std::cout << typeid(*this).name() << "::" << __func__ << " end\n\n";
+	std::cout << typeid(*this).name() << "::" << __func__ << " END\n";
 }
 
 
@@ -47,16 +47,16 @@ void Grabbing::setImageFileMode(bool fileMode)
 
 }
 
-bool Grabbing::getImageFileMode()
-{
-	return m_imageFileMode;
-}
-
 void Grabbing::loadPath(std::string imageFilePath)
 {
 	std::lock_guard<std::mutex> guard(m_imageFilePathMutex);
-	if (m_imageFilePath != imageFilePath)
+	do {
+		if (m_imageFilePath != imageFilePath)
+			break;
+
 		return;
+
+	} while (0);
 	
 	m_imageFilePath = imageFilePath;
 	m_imageFilePathNew = true;
@@ -96,7 +96,7 @@ bool Grabbing::stopFlag()
 
 void Grabbing::run()
 {
-	std::cout << typeid(*this).name() << "::" << __func__ << " start\n\n";
+	std::cout << typeid(*this).name() << "::" << __func__ << " START\n";
 	while (!stopFlag())
 	{
 		if (isImageFileMode())
@@ -115,12 +115,18 @@ void Grabbing::loadImagesFromDisk()
 {
 	std::unique_lock<std::mutex> fileGuard(m_imageFilePathMutex);
 
-	if (m_imageFilePathNew)
+	do
+	{
+		if (m_imageFilePathNew)
+			break;
+
+		std::cv_status res = m_imageFilePathReady.wait_for(fileGuard, std::chrono::milliseconds(100));
+		if (res == std::cv_status::no_timeout)
+			break;
+
 		return;
+	} while (0);
 	
-	std::cv_status res = m_imageFilePathReady.wait_for(fileGuard, std::chrono::milliseconds(100));
-	if (res == std::cv_status::no_timeout)
-		return;
 
 	std::lock_guard<std::mutex> imageGuard(m_imageMutex);
 	std::cout << " --> " << typeid(*this).name() << "::" << __func__ << " file path modified" << "\n";
@@ -134,15 +140,9 @@ void Grabbing::loadImagesFromDisk()
 	image_buffer.seekg(0, std::ios::beg);
 	char* buffer = new char[image_buffer_size];
 	image_buffer.read(buffer, image_buffer_size);
-	cv::Mat img = cv::Mat(3008, 4112, CV_16U, buffer);
-	m_image = conversione(img);
-
-	cv::namedWindow("Output Image", cv::WINDOW_AUTOSIZE);
-	cv::imshow("Output Image", img);
-	cv::waitKey();
-
+	m_image = cv::Mat(3008, 4112, CV_8U, buffer);
 	image_buffer.close();
-	//delete buffer;
+	
 	
 	m_imageFilePathNew = false;
 	m_imageEmpty = false;
@@ -158,14 +158,4 @@ void Grabbing::loadImagesFromCamera()
 {
 }
 
-cv::Mat Grabbing::conversione(cv::Mat img)
-{
-	double min = 0;
-	double max = 65536;
-	cv::minMaxLoc(img, &min, &max);
-	cv::Mat img8bit;
-	img.convertTo(img8bit, CV_8U, 255.0 / (max - min), -min * 255.0 / (max - min));
-	cv::Mat BGRimage;
-	cv::cvtColor(img8bit, BGRimage, cv::COLOR_GRAY2BGR);
-	return BGRimage;
-}
+

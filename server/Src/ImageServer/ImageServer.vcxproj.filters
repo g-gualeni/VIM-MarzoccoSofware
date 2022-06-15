@@ -27,6 +27,12 @@
     <ClCompile Include="GRABBING\Grabbing.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
+    <ClCompile Include="CHECKING\Checking.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="GEOMETRY\GeometricCircle.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PROCESSING\Processing.h">
@@ -36,6 +42,12 @@
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="GRABBING\Grabbing.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="CHECKING\Checking.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="GEOMETRY\GeometricCircle.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
   </ItemGroup>
