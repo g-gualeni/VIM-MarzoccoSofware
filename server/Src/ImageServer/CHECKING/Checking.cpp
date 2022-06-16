@@ -57,7 +57,17 @@ void Checking::run()
 	{
 		if (isImageNew())
 		{
-			blobCircleOuter(m_image);
+			cv::Mat BGRimage;
+			cv::cvtColor(m_image, BGRimage, cv::COLOR_GRAY2BGR);
+
+			cv::Mat thresholding;
+			cv::threshold(BGRimage, thresholding, 200, 255, cv::THRESH_BINARY);
+			//cv::Mat gray;
+			//cv::cvtColor(BGRimage, gray, cv::COLOR_BGR2GRAY);
+			//thresholding.convertTo(gray, cv::IMREAD_GRAYSCALE);
+			//houghCircleOuter(thresholding);
+			
+			blobCircleOuter(thresholding);
 		}
 		else
 		{
@@ -99,31 +109,53 @@ bool Checking::isImageNew()
 	return m_imageNew;
 }
 
+int Checking::houghCircleOuter(cv::Mat image)
+{
+	cv::Mat blur;
+	cv::GaussianBlur(image, blur, cv::Size(9, 9), 2, 2);
+	std::vector<cv::Vec3f> circles;
+
+	HoughCircles(blur, circles, cv::HOUGH_GRADIENT,
+		2,   // accumulator resolution (size of the image / 2)
+		5,  // minimum distance between two circles
+		100, // Canny high threshold
+		100, // minimum number of votes
+		2200, 10000); // min and max radius
+	 // Draw the circles detected
+	for (size_t i = 0; i < circles.size(); i++)
+	{
+		cv::Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
+		int radius = cvRound(circles[i][2]);
+		cv::circle(image, center, 3, cv::Scalar(0, 255, 255));// circle center     
+		cv::circle(image, center, radius, cv::Scalar(255, 0, 255));// circle outline
+		
+	}
+	return 0;
+}
+
 int Checking::blobCircleOuter(cv::Mat image)
 {
-	cv::Mat BGRimage;
-	cv::cvtColor(image, BGRimage, cv::COLOR_GRAY2BGR);
-	cv::Mat thresholding;
-	cv::bitwise_not(BGRimage, thresholding);
 	cv::SimpleBlobDetector::Params params;
+	
 	params.minThreshold = 10;
 	params.maxThreshold = 200;
+	params.filterByColor = true;
+	params.blobColor = 255;
 	params.filterByArea = true;
-	params.minArea = 1000;	
+	params.minArea = 100;
 	params.maxArea = FLT_MAX;
-	params.filterByCircularity = true;
-	params.minCircularity = 0.5;
-	params.filterByConvexity = true;
-	params.minConvexity = 0.2;
-	params.filterByInertia = true;
-	params.minInertiaRatio = 0.7;
+	params.filterByCircularity = false;
+	params.filterByConvexity = false;
+	params.filterByInertia = false;
+	
 
 	cv::Ptr<cv::SimpleBlobDetector> detector = cv::SimpleBlobDetector::create(params);
 
 	std::vector<cv::KeyPoint> keypoints;
-	detector->detect(thresholding, keypoints);
-	cv::Mat img;
-	cv::drawKeypoints(BGRimage, keypoints, BGRimage, cv::Scalar(255, 0, 255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+ 	detector->detect(image, keypoints); // IMAGE BINARIZZATA CON THRESHOLDING 200-255
+	
+	cv::Mat imageDrawing;
+	cv::drawKeypoints(image, keypoints, imageDrawing, cv::Scalar(255, 0, 255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
 	if (keypoints.size() <= 0)
 	{
 		return -1;

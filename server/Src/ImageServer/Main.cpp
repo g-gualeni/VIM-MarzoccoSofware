@@ -24,7 +24,7 @@ bool checkEscRequest()
 
 std::string referenceImageFolder()
 {
-	std::filesystem::path referenceImageFolder("C:\\GitHub\\VIM-MarzoccoSofware\\server\\Res\\image.tiff");
+	std::filesystem::path referenceImageFolder("C:\\GitHub\\VIM-MarzoccoSofware\\server\\Res\\no_filtro.tiff");
 	return referenceImageFolder.string();
 
 }
