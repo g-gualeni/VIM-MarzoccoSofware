@@ -24,7 +24,7 @@ private:
 	void clearImageNew();
 	bool stopFlag();
 	bool isImageNew();
-	int houghCircleOuter(cv::Mat image);
+	
 
 
 	int blobCircleOuter(cv::Mat image);

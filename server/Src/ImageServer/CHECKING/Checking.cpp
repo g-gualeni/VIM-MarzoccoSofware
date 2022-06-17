@@ -62,10 +62,7 @@ void Checking::run()
 
 			cv::Mat thresholding;
 			cv::threshold(BGRimage, thresholding, 200, 255, cv::THRESH_BINARY);
-			//cv::Mat gray;
-			//cv::cvtColor(BGRimage, gray, cv::COLOR_BGR2GRAY);
-			//thresholding.convertTo(gray, cv::IMREAD_GRAYSCALE);
-			//houghCircleOuter(thresholding);
+			
 			
 			blobCircleOuter(thresholding);
 		}
@@ -109,29 +106,6 @@ bool Checking::isImageNew()
 	return m_imageNew;
 }
 
-int Checking::houghCircleOuter(cv::Mat image)
-{
-	cv::Mat blur;
-	cv::GaussianBlur(image, blur, cv::Size(9, 9), 2, 2);
-	std::vector<cv::Vec3f> circles;
-
-	HoughCircles(blur, circles, cv::HOUGH_GRADIENT,
-		2,   // accumulator resolution (size of the image / 2)
-		5,  // minimum distance between two circles
-		100, // Canny high threshold
-		100, // minimum number of votes
-		2200, 10000); // min and max radius
-	 // Draw the circles detected
-	for (size_t i = 0; i < circles.size(); i++)
-	{
-		cv::Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
-		int radius = cvRound(circles[i][2]);
-		cv::circle(image, center, 3, cv::Scalar(0, 255, 255));// circle center     
-		cv::circle(image, center, radius, cv::Scalar(255, 0, 255));// circle outline
-		
-	}
-	return 0;
-}
 
 int Checking::blobCircleOuter(cv::Mat image)
 {
