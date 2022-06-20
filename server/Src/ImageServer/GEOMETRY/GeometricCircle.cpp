@@ -17,5 +17,5 @@ cv::Point GeometricCircle::centerAsCvPoint() const
 
 int GeometricCircle::radius() const
 {
-	m_radius;
+	return m_radius;
 }
