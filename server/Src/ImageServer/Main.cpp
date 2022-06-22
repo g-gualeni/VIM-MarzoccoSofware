@@ -24,7 +24,7 @@ bool checkEscRequest()
 
 std::string referenceImageFolder()
 {
-	std::filesystem::path referenceImageFolder("C:\\GitHub\\VIM-MarzoccoSofware\\server\\Res\\no_filtro.tiff");
+	std::filesystem::path referenceImageFolder("C:\\GitHub\\VIM-MarzoccoSofware\\server\\Res\\Con_filtro.tiff");
 	return referenceImageFolder.string();
 
 }
@@ -53,7 +53,7 @@ int main()
 		std::cout << "--> ESC Thread finito\n";
 		});
     Grabbing* grabber = new Grabbing();
-	Checking* checker = new Checking();
+	Checking checker;
     Processing* processer = new Processing();
 
 	std::string image_path = referenceImageFolder();
@@ -68,16 +68,15 @@ int main()
 			EscFlag = true;
 
 		cv::Mat imageGrabberWait = grabber->imageWait(3000);
-		checker->setImage(imageGrabberWait);
-
-		cv::Mat imageCheckerWait = checker->imageWait(3000);
+		checker.setImage(imageGrabberWait);
+		bool prova = checker.getZeroZone_check();
+		
 
 	}
 
 	
 	std::cout << "\n\n[MAIN]: Applicazione finita\n\n";
 	delete processer;
-	delete checker;
 	delete grabber;
 	aspettaESC.join();
 

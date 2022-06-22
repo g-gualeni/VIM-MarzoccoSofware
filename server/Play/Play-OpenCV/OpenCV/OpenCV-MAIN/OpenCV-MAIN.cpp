@@ -90,6 +90,7 @@ int contours(cv::Mat image)
 
 	if (theoryTollerance <= realTollerance)
 		imageZ0 = true; // Immagine senza ingombro
+	
 }
 
 int blobCircleOuter(cv::Mat image)

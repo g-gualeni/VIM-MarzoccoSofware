@@ -1,112 +1,97 @@
 #include "Checking.h"
-#include <iostream>
-#include <windows.h>
 
-
-Checking::Checking()
-{
-	start();
-}
-
-Checking::~Checking()
-{
-	stopAndWait();
-}
-
-void Checking::start()
-{
-	std::lock_guard<std::mutex> guard(m_stop_mutex);
-	m_stop_flag = false;
-	m_thread = new std::thread(&Checking::run, this);
-}
-
-void Checking::stopAndWait()
-{
-	m_stop_mutex.lock();
-	m_stop_flag = true;
-	m_stop_mutex.unlock();
-	m_thread->join();
-	std::cout << typeid(*this).name() << "::" << __func__ << " END\n";
-}
 
 void Checking::setImage(cv::Mat image)
 {
-	std::lock_guard<std::mutex> guard(m_imageMutex);
-	std::lock_guard<std::mutex> guardOut(m_imageOutputMutex);
 	m_image = image;
-	if (!m_image.data)
+}
+
+bool Checking::getZeroZone_check()
+{
+	ZeroZone_checker();
+	return m_ZeroZone_check;
+}
+
+bool Checking::getFirstZone_check()
+{
+	return m_FirstZone_check;
+}
+
+void Checking::ZeroZone_checker()
+{
+	if (m_image.empty())
 		return;
 
-	m_imageNew = true;
-	m_imageOutputReady = false;
-}
+	std::vector<std::vector<cv::Point> > contours;
+	std::vector<cv::Vec4i> hierarchy;
+	cv::findContours(m_image, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
 
-cv::Mat Checking::imageWait(int timeout_ms)
-{
-	while (!isImageOutputReady())
+	std::vector<std::vector<cv::Point> > outerContours;
+	for (size_t i = 0; i < contours.size(); i++)
 	{
-		Sleep(100);
+		if (contours[i].size() > 20) // PARAMETRO 20 DA TENERE FISSO
+			outerContours.push_back(contours.at(i));
 	}
-	return m_imageOutput;
-	
-}
+	std::vector<std::vector<cv::Point> > contours_poly(outerContours.size());
+	std::vector<cv::Point2f>center(outerContours.size());
+	std::vector<float>radius(outerContours.size());
+	std::vector<GeometricCircle> circles;
 
-void Checking::run()
-{
-	while (!stopFlag())
+	cv::Mat drawingContours = cv::Mat::zeros(m_image.size(), CV_8UC3);
+	cv::Mat drawingCircles = cv::Mat::zeros(m_image.size(), CV_8UC3);
+	cv::Mat1b contour_mask(m_image.rows, m_image.cols, uchar(0));
+	for (size_t i = 0; i < outerContours.size(); i++)
 	{
-		if (isImageNew())
-		{
-			cv::Mat BGRimage;
-			cv::cvtColor(m_image, BGRimage, cv::COLOR_GRAY2BGR);
-
-			cv::Mat thresholding;
-			cv::threshold(BGRimage, thresholding, 200, 255, cv::THRESH_BINARY);
-			
-			
-			blobCircleOuter(thresholding);
-		}
-		else
-		{
-			Sleep(1000);
-		}
+		approxPolyDP(cv::Mat(outerContours[i]), contours_poly[i], 3, false);
+		cv::minEnclosingCircle((cv::Mat)contours_poly[i], center[i], radius[i]);
+		drawContours(drawingContours, contours_poly, i, cv::Scalar(255, 0, 255), 5, 8, std::vector<cv::Vec4i>(), 0, cv::Point());
+		cv::drawContours(contour_mask, contours_poly, i, cv::Scalar(255), cv::FILLED);
+		circle(drawingCircles, center[i], radius[i], cv::Scalar(0, 255, 255), 5, 8, 0);
+		if (!center.empty())
+			circles.push_back(GeometricCircle(center[i], radius[i]));
 	}
-	// SETTARE LA NUOVA IMMAGINE
-	clearImageNew();
+
+	if (circles.empty()) //Non ci sono circonferenze
+		return;			
+
+	bool trovato = false;
+	int biggest = 0;
+	for (size_t i = 0; i < circles.size(); i++)
+	{
+		if (circles[i].radius() > 850) // PARAMETRO 850 DA TENERE FISSO 
+		{
+			trovato = true;
+			biggest = i;
+			break;
+		}
+
+	}
+
+	cv::Mat1b circle_mask(m_image.rows, m_image.cols, uchar(0));
+	if (!trovato) // NON E' stato individuato il cerchio esterno 
+		return;
+	else
+		circle(circle_mask, center[biggest], radius[biggest], cv::Scalar(255), cv::FILLED);
+
+
+	int whitePixel_inside_countor = cv::countNonZero(contour_mask);
+	int whitePixel_inside_circle = cv::countNonZero(circle_mask);
+	int difference = abs(whitePixel_inside_circle - whitePixel_inside_countor);
+	double theoryTollerance = (double)difference / std::min(whitePixel_inside_circle, whitePixel_inside_countor) * 100;
+	double realTollerance = 0.05 * 100; // PARAMETRO FISSO, TOLLERANZA DEL 5%
+
+	std::cout << "PIXEL BIANCHI CONTORNO: " << whitePixel_inside_countor << "\n";
+	std::cout << "PIXEL BIANCHI CERCHIO: " << whitePixel_inside_circle << "\n";
+	std::cout << "TOLLERANZA: " << theoryTollerance << "\n";
+
+	if (theoryTollerance <= realTollerance)
+		m_ZeroZone_check = true; // Immagine senza ingombro
 }
 
-bool Checking::isImageOutputReady()
-{
-	std::lock_guard<std::mutex> guard(m_imageOutputMutex);
-	return m_imageOutputReady;
-}
-
-void Checking::setImageOutput(cv::Mat imageOutput)
-{
-	std::lock_guard<std::mutex> guard(m_imageOutputMutex);
-	m_imageOutput = imageOutput;
-	m_imageOutputReady = true;
-}
-
-void Checking::clearImageNew()
-{
-	std::lock_guard<std::mutex> guard(m_imageMutex);
-	m_imageNew = false;
-}
-
-bool Checking::stopFlag()
-{
-	std::lock_guard<std::mutex> guard(m_stop_mutex);
-	return m_stop_flag;
-}
-
-bool Checking::isImageNew()
-{
-	std::lock_guard<std::mutex> guard(m_imageMutex);
-	return m_imageNew;
-}
 
 
+
+/*
 int Checking::blobCircleOuter(cv::Mat image)
 {
 	cv::SimpleBlobDetector::Params params;
@@ -136,3 +121,4 @@ int Checking::blobCircleOuter(cv::Mat image)
 	}
 	return 0;
 }
+*/
