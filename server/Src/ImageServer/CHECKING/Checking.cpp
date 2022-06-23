@@ -1,6 +1,8 @@
 #include "Checking.h"
 
 
+
+
 void Checking::setImage(cv::Mat image)
 {
 	m_image = image;
@@ -8,8 +10,13 @@ void Checking::setImage(cv::Mat image)
 
 bool Checking::getZeroZone_check()
 {
-	ZeroZone_checker();
+	
 	return m_ZeroZone_check;
+}
+
+bool Checking::getBoolTimer()
+{
+	return m_timer;
 }
 
 bool Checking::getFirstZone_check()
@@ -22,9 +29,15 @@ void Checking::ZeroZone_checker()
 	if (m_image.empty())
 		return;
 
+	cv::Mat workedImage;
+	cv::cvtColor(m_image, workedImage, cv::COLOR_BGR2GRAY);
+
+	cv::Mat thresholding;
+	cv::threshold(workedImage, thresholding, 200, 255, cv::THRESH_BINARY);
+
 	std::vector<std::vector<cv::Point> > contours;
 	std::vector<cv::Vec4i> hierarchy;
-	cv::findContours(m_image, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
+	cv::findContours(thresholding, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
 
 	std::vector<std::vector<cv::Point> > outerContours;
 	for (size_t i = 0; i < contours.size(); i++)
@@ -37,9 +50,9 @@ void Checking::ZeroZone_checker()
 	std::vector<float>radius(outerContours.size());
 	std::vector<GeometricCircle> circles;
 
-	cv::Mat drawingContours = cv::Mat::zeros(m_image.size(), CV_8UC3);
-	cv::Mat drawingCircles = cv::Mat::zeros(m_image.size(), CV_8UC3);
-	cv::Mat1b contour_mask(m_image.rows, m_image.cols, uchar(0));
+	cv::Mat drawingContours = cv::Mat::zeros(thresholding.size(), CV_8UC3);
+	cv::Mat drawingCircles = cv::Mat::zeros(thresholding.size(), CV_8UC3);
+	cv::Mat1b contour_mask(thresholding.rows, thresholding.cols, uchar(0));
 	for (size_t i = 0; i < outerContours.size(); i++)
 	{
 		approxPolyDP(cv::Mat(outerContours[i]), contours_poly[i], 3, false);
@@ -67,7 +80,7 @@ void Checking::ZeroZone_checker()
 
 	}
 
-	cv::Mat1b circle_mask(m_image.rows, m_image.cols, uchar(0));
+	cv::Mat1b circle_mask(thresholding.rows, thresholding.cols, uchar(0));
 	if (!trovato) // NON E' stato individuato il cerchio esterno 
 		return;
 	else
@@ -86,8 +99,33 @@ void Checking::ZeroZone_checker()
 
 	if (theoryTollerance <= realTollerance)
 		m_ZeroZone_check = true; // Immagine senza ingombro
+	else
+		m_timer = true;
 }
 
+/*
+void Checking::Alert_message()
+{
+	int contatore = 0;
+	if (m_timer)
+		std::thread timer([&]()
+			{
+				while (contatore < 25) // PARAMETRO DA FISSARE => 25 MOLTIPLICATO PER IL NUMERO DI MILLISECODNI DELLO SLEEP RESTITUISCE IL NUMERO DI SECONDI DI ATTESA
+				{
+					if (getBoolTimer())
+						return;
+
+					Sleep(200);
+					contatore++;
+				}
+				m_mutexTimer.lock();
+				m_timer = false;
+				m_mutexTimer.unlock();
+				std::cout << "Tempo di attesa scaduto! Si prega l'operatore di posizionare meglio il pezzo!\n";
+			});
+	
+}
+*/
 
 
 

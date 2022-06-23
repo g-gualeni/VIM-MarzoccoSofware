@@ -133,7 +133,7 @@ int blobCircleOuter(cv::Mat image)
 }
 int main()
 {
-    cv::Mat m_image = cv::imread("C:\\GitHub\\VIM-MarzoccoSofware\\server\\Res\\manoInside.tiff");
+    cv::Mat m_image = cv::imread("C:\\GitHub\\VIM-MarzoccoSofware\\server\\Res\\Con_filtro.tiff");
 	cv::Mat m_image1c;
 	cv::cvtColor(m_image, m_image1c, cv::COLOR_BGR2GRAY);
 	

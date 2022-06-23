@@ -131,19 +131,9 @@ void Grabbing::loadImagesFromDisk()
 	std::lock_guard<std::mutex> imageGuard(m_imageMutex);
 	std::cout << " --> " << typeid(*this).name() << "::" << __func__ << " file path modified" << "\n";
 
-	std::ifstream image_buffer(m_imageFilePath, std::ios::binary);
-	image_buffer.seekg(0); // DA MODIFICARE
-	std::streampos start = image_buffer.tellg();
-	image_buffer.seekg(0, std::ios::end);
-	std::streampos end = image_buffer.tellg();
-	auto image_buffer_size = end - start;
-	image_buffer.seekg(0, std::ios::beg);
-	char* buffer = new char[image_buffer_size];
-	image_buffer.read(buffer, image_buffer_size);
-	m_image = cv::Mat(3008, 4112, CV_8U, buffer);
-	image_buffer.close();
-	
-	
+	m_image = cv::imread(m_imageFilePath);
+	std::cout << "    - " << "Image: " << " - " << m_image.size() << "\n";
+
 	m_imageFilePathNew = false;
 	m_imageEmpty = false;
 
