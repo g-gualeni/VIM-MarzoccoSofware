@@ -1,7 +1,17 @@
+#include <Windows.h>
+
 #include "Checking.h"
+#include "..\UTILITY\ElapsedTime.h"
 
 
 
+Checking::Checking()
+{
+}
+
+Checking::~Checking()
+{
+}
 
 void Checking::setImage(cv::Mat image)
 {
@@ -10,7 +20,7 @@ void Checking::setImage(cv::Mat image)
 
 bool Checking::getZeroZone_check()
 {
-	
+	ZeroZone_checker();
 	return m_ZeroZone_check;
 }
 
@@ -26,6 +36,8 @@ bool Checking::getFirstZone_check()
 
 void Checking::ZeroZone_checker()
 {
+	ElapsedTime ET;
+	ET.start();
 	if (m_image.empty())
 		return;
 
@@ -101,32 +113,9 @@ void Checking::ZeroZone_checker()
 		m_ZeroZone_check = true; // Immagine senza ingombro
 	else
 		m_timer = true;
+
+	std::cout << ET.elapsed("[CHECKING]: checker ZeroZONE ") << "\n";
 }
-
-/*
-void Checking::Alert_message()
-{
-	int contatore = 0;
-	if (m_timer)
-		std::thread timer([&]()
-			{
-				while (contatore < 25) // PARAMETRO DA FISSARE => 25 MOLTIPLICATO PER IL NUMERO DI MILLISECODNI DELLO SLEEP RESTITUISCE IL NUMERO DI SECONDI DI ATTESA
-				{
-					if (getBoolTimer())
-						return;
-
-					Sleep(200);
-					contatore++;
-				}
-				m_mutexTimer.lock();
-				m_timer = false;
-				m_mutexTimer.unlock();
-				std::cout << "Tempo di attesa scaduto! Si prega l'operatore di posizionare meglio il pezzo!\n";
-			});
-	
-}
-*/
-
 
 
 /*

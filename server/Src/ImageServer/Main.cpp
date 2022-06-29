@@ -16,6 +16,8 @@
 
 std::mutex EscFlagMutex;
 bool EscFlag = false;
+bool main_timer = true;
+
 bool checkEscRequest()
 {
 	std::lock_guard<std::mutex> guard(EscFlagMutex);
@@ -24,9 +26,40 @@ bool checkEscRequest()
 
 std::string referenceImageFolder()
 {
-	std::filesystem::path referenceImageFolder("C:\\GitHub\\VIM-MarzoccoSofware\\server\\Res\\Con_filtro.tiff");
+	std::filesystem::path referenceImageFolder("C:\\GitHub\\VIM-MarzoccoSofware\\server\\Res\\manoInside.tiff");
 	return referenceImageFolder.string();
 
+}
+
+void alert_message(Checking* checker)
+{
+	int contatore = 0;
+	if (checker->getBoolTimer() && main_timer)
+	{
+		main_timer = false;
+		std::thread timer([&]()
+			{
+				while (contatore < 25) // PARAMETRO DA FISSARE => 25 MOLTIPLICATO PER IL NUMERO DI MILLISECODNI DELLO SLEEP RESTITUISCE IL NUMERO DI SECONDI DI ATTESA
+				{
+					if (checker->getZeroZone_check())
+					{
+						std::cout << "Pezzo posizionato OK\n";
+						return;
+					}
+
+					Sleep(200);
+					contatore++;
+				}
+				std::cout << "Tempo di attesa scaduto! Si prega l'operatore di posizionare meglio il pezzo!\n";
+				
+			});
+
+	}
+	else
+	{
+		std::cout << "Pezzo gia' posizionato OK\n";
+
+	}
 }
 int main()
 {
@@ -53,7 +86,7 @@ int main()
 		std::cout << "--> ESC Thread finito\n";
 		});
     Grabbing* grabber = new Grabbing();
-	Checking checker;
+	Checking* checker = new Checking();
     Processing* processer = new Processing();
 
 	std::string image_path = referenceImageFolder();
@@ -68,8 +101,9 @@ int main()
 			EscFlag = true;
 
 		cv::Mat imageGrabberWait = grabber->imageWait(3000);
-		checker.setImage(imageGrabberWait);
-		bool prova = checker.getZeroZone_check();
+		checker->setImage(imageGrabberWait);
+		checker->ZeroZone_checker();
+		alert_message(checker);
 		
 
 	}
@@ -78,6 +112,7 @@ int main()
 	std::cout << "\n\n[MAIN]: Applicazione finita\n\n";
 	delete processer;
 	delete grabber;
+	delete checker;
 	aspettaESC.join();
 
     return 0;

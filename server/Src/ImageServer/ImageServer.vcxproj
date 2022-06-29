@@ -161,6 +161,7 @@
     <ClCompile Include="GUI\GUICommunication.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="PROCESSING\Processing.cpp" />
+    <ClCompile Include="UTILITY\ElapsedTime.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CHECKING\Checking.h" />
@@ -168,6 +169,7 @@
     <ClInclude Include="GRABBING\Grabbing.h" />
     <ClInclude Include="GUI\GUICommunication.h" />
     <ClInclude Include="PROCESSING\Processing.h" />
+    <ClInclude Include="UTILITY\ElapsedTime.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
