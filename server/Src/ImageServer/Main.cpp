@@ -17,6 +17,7 @@
 std::mutex EscFlagMutex;
 bool EscFlag = false;
 bool main_timer = true;
+std::mutex mainTimerMutex;
 
 bool checkEscRequest()
 {
@@ -37,27 +38,41 @@ void alert_message(Checking* checker)
 	if (checker->getBoolTimer() && main_timer)
 	{
 		main_timer = false;
-		std::thread timer([&]()
-			{
-				while (contatore < 25) // PARAMETRO DA FISSARE => 25 MOLTIPLICATO PER IL NUMERO DI MILLISECODNI DELLO SLEEP RESTITUISCE IL NUMERO DI SECONDI DI ATTESA
+		do
+		{
+			if (!checker->getZeroZone_check())
+			
+			std::thread timer([&]()
 				{
-					if (checker->getZeroZone_check())
+					while (contatore < 25) // PARAMETRO DA FISSARE => 25 MOLTIPLICATO PER IL NUMERO DI MILLISECODNI DELLO SLEEP RESTITUISCE IL NUMERO DI SECONDI DI ATTESA
 					{
-						std::cout << "Pezzo posizionato OK\n";
-						return;
-					}
+						if (checker->getZeroZone_check())
+						{
+							std::cout << "Pezzo posizionato OK\n";
+							mainTimerMutex.lock();
+							main_timer = true;
+							mainTimerMutex.unlock();
+							return;
+						}
 
-					Sleep(200);
-					contatore++;
-				}
-				std::cout << "Tempo di attesa scaduto! Si prega l'operatore di posizionare meglio il pezzo!\n";
+						Sleep(200);
+						contatore++;
+					}
+					std::cout << "Tempo di attesa scaduto! Si prega l'operatore di posizionare meglio il pezzo!\n";
+					mainTimerMutex.lock();
+					main_timer = true;
+					mainTimerMutex.unlock();
 				
-			});
+				});
+
+		} while (0);
+
 
 	}
 	else
 	{
-		std::cout << "Pezzo gia' posizionato OK\n";
+		if(main_timer)
+			std::cout << "Pezzo gia' posizionato OK\n";
 
 	}
 }
@@ -99,6 +114,7 @@ int main()
 
 		if (checkFileMode)
 			EscFlag = true;
+		
 
 		cv::Mat imageGrabberWait = grabber->imageWait(3000);
 		checker->setImage(imageGrabberWait);
