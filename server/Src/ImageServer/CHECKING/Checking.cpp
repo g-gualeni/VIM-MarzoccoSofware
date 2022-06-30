@@ -20,7 +20,6 @@ void Checking::setImage(cv::Mat image)
 
 bool Checking::getZeroZone_check()
 {
-	ZeroZone_checker();
 	return m_ZeroZone_check;
 }
 
@@ -34,10 +33,13 @@ bool Checking::getFirstZone_check()
 	return m_FirstZone_check;
 }
 
-void Checking::ZeroZone_checker()
+void Checking::ZonesChecker_beforeProcessing()
 {
+	m_timer = false;
 	ElapsedTime ET;
 	ET.start();
+
+	// ANALISI BORDO ESTERNO 
 	if (m_image.empty())
 		return;
 
@@ -76,18 +78,26 @@ void Checking::ZeroZone_checker()
 			circles.push_back(GeometricCircle(center[i], radius[i]));
 	}
 
-	if (circles.empty()) //Non ci sono circonferenze
+	if (circles.size() <= 1) // Non ci sono circonferenze oppure c'è l'unica esterna senza oggetti sul piattino
 		return;			
 
 	bool trovato = false;
+	bool pezzoPresente = false;
 	int biggest = 0;
+	int pezzo = 0;
 	for (size_t i = 0; i < circles.size(); i++)
 	{
 		if (circles[i].radius() > 850) // PARAMETRO 850 DA TENERE FISSO 
 		{
 			trovato = true;
 			biggest = i;
-			break;
+			
+		}
+
+		if (circles[i].radius() > 500 && i != biggest)
+		{
+			pezzoPresente = true;
+			pezzo = i;
 		}
 
 	}
@@ -105,14 +115,34 @@ void Checking::ZeroZone_checker()
 	double theoryTollerance = (double)difference / std::min(whitePixel_inside_circle, whitePixel_inside_countor) * 100;
 	double realTollerance = 0.05 * 100; // PARAMETRO FISSO, TOLLERANZA DEL 5%
 
-	std::cout << "PIXEL BIANCHI CONTORNO: " << whitePixel_inside_countor << "\n";
-	std::cout << "PIXEL BIANCHI CERCHIO: " << whitePixel_inside_circle << "\n";
-	std::cout << "TOLLERANZA: " << theoryTollerance << "\n";
+	//std::cout << "PIXEL BIANCHI CONTORNO: " << whitePixel_inside_countor << "\n";
+	//std::cout << "PIXEL BIANCHI CERCHIO: " << whitePixel_inside_circle << "\n";
+	//std::cout << "TOLLERANZA: " << theoryTollerance << "\n";
 
-	if (theoryTollerance <= realTollerance)
-		m_ZeroZone_check = true; // Immagine senza ingombro
+	if (theoryTollerance > realTollerance)
+		m_ZeroZone_check = true;
 	else
-		m_timer = true;
+		m_timer = true; // Immagine con ingombro esterno 
+
+	// ANALISI BORDO INTERNO 
+	
+	// VERIFICA DI PRESENZA DI UN FILTRO
+	if (!pezzoPresente)
+		return;				// Non è presente alcun filtro
+
+	double radiusFactor = radius[biggest] * 15 / 100;
+	int radiusCircleLimit = radius[biggest] - radiusFactor + 1; //Arrotondamento al prossimo integer 
+	GeometricCircle circleLimit = { center[biggest], radiusCircleLimit };
+	circle(drawingCircles, circleLimit.centerAsCvPoint(), radiusCircleLimit, cv::Scalar(255, 0, 255), 5, 8, 0);
+
+	double centers_delta_X = (double)circleLimit.centerAsCvPoint().x - (double)circles[pezzo].centerAsCvPoint().x;
+	double centers_delta_Y = (double)circleLimit.centerAsCvPoint().y - (double)circles[pezzo].centerAsCvPoint().y;
+	double distanceBewteenCenters = sqrt((double)centers_delta_X * centers_delta_X + (double)centers_delta_Y * centers_delta_Y);
+	if (distanceBewteenCenters + circles[pezzo].radius() < circleLimit.radius())
+		m_FirstZone_check = true;
+	else
+		m_timer = true; // Immagine con ingombro interno 
+	
 
 	std::cout << ET.elapsed("[CHECKING]: checker ZeroZONE ") << "\n";
 }

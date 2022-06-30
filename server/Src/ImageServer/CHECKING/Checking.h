@@ -15,7 +15,7 @@ public:
 	bool getBoolTimer();
 	bool getFirstZone_check();
 
-	void ZeroZone_checker();
+	void ZonesChecker_beforeProcessing();
 	
 private:
 private:

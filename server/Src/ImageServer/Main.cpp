@@ -16,8 +16,11 @@
 
 std::mutex EscFlagMutex;
 bool EscFlag = false;
-bool main_timer = true;
+
 std::mutex mainTimerMutex;
+bool main_timer = true;
+bool threadTimeout = false;
+std::thread* timer = nullptr;
 
 bool checkEscRequest()
 {
@@ -27,54 +30,47 @@ bool checkEscRequest()
 
 std::string referenceImageFolder()
 {
-	std::filesystem::path referenceImageFolder("C:\\GitHub\\VIM-MarzoccoSofware\\server\\Res\\manoInside.tiff");
+	std::filesystem::path referenceImageFolder("C:\\GitHub\\VIM-MarzoccoSofware\\server\\Res\\Con_filtro.tiff");
 	return referenceImageFolder.string();
 
 }
+auto worker = [](Checking* checker) {
 
+	int contatore = 0;
+	
+	while (contatore < 25)
+	{
+		if (checker->getZeroZone_check())
+		{
+			mainTimerMutex.lock();
+			main_timer = true;
+			mainTimerMutex.unlock();
+			threadTimeout = true;
+			return;
+		}
+		Sleep(200);
+		contatore++;
+	}
+	std::cout << "Tempo di attesa scaduto! Si prega l'operatore di posizionare meglio il pezzo!\n";
+	mainTimerMutex.lock();
+	main_timer = true;
+	mainTimerMutex.unlock();
+	threadTimeout = true;
+};
 void alert_message(Checking* checker)
 {
 	int contatore = 0;
-	if (checker->getBoolTimer() && main_timer)
+	if (checker->getBoolTimer())
 	{
+		if (main_timer)
+			timer = new std::thread(worker, checker);
+
+		
 		main_timer = false;
-		do
-		{
-			if (!checker->getZeroZone_check())
-			
-			std::thread timer([&]()
-				{
-					while (contatore < 25) // PARAMETRO DA FISSARE => 25 MOLTIPLICATO PER IL NUMERO DI MILLISECODNI DELLO SLEEP RESTITUISCE IL NUMERO DI SECONDI DI ATTESA
-					{
-						if (checker->getZeroZone_check())
-						{
-							std::cout << "Pezzo posizionato OK\n";
-							mainTimerMutex.lock();
-							main_timer = true;
-							mainTimerMutex.unlock();
-							return;
-						}
-
-						Sleep(200);
-						contatore++;
-					}
-					std::cout << "Tempo di attesa scaduto! Si prega l'operatore di posizionare meglio il pezzo!\n";
-					mainTimerMutex.lock();
-					main_timer = true;
-					mainTimerMutex.unlock();
-				
-				});
-
-		} while (0);
-
-
+		
 	}
-	else
-	{
-		if(main_timer)
-			std::cout << "Pezzo gia' posizionato OK\n";
-
-	}
+	
+	
 }
 int main()
 {
@@ -89,6 +85,7 @@ int main()
 		// WAIT for the ESC key and then set the EscFlag to stop execution
 		while (GetAsyncKeyState(VK_ESCAPE) == 0) {
 
+			
 			if (checkEscRequest())
 				return;
 
@@ -111,15 +108,29 @@ int main()
 	
 	while (checkEscRequest() == false)
 	{
-
+		/*
 		if (checkFileMode)
 			EscFlag = true;
+			*/
 		
+		do
+		{
+			cv::Mat imageGrabberWait = grabber->imageWait(3000);
+			checker->setImage(imageGrabberWait);
+			checker->ZonesChecker_beforeProcessing();
+			if (!checker->getBoolTimer() && !checker->getZeroZone_check())
+			{
+				std::cout << "Inserire un pezzo da analizzare\n";
+				Sleep(5000);				//Attesa che l'utente inserisca un pezzo sotto l'illuminatore
+			}
+			alert_message(checker);
+			if(threadTimeout)
+				timer->join();
+									
 
-		cv::Mat imageGrabberWait = grabber->imageWait(3000);
-		checker->setImage(imageGrabberWait);
-		checker->ZeroZone_checker();
-		alert_message(checker);
+		} while (!checker->getZeroZone_check());
+
+		std::cout << "Pezzo in posizione!\n";
 		
 
 	}
