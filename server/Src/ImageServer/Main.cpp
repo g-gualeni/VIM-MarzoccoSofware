@@ -40,7 +40,7 @@ auto worker = [](Checking* checker) {
 	
 	while (contatore < 25)
 	{
-		if (checker->getZeroZone_check())
+		if (checker->getFirstZone_check())
 		{
 			mainTimerMutex.lock();
 			main_timer = true;
@@ -51,11 +51,14 @@ auto worker = [](Checking* checker) {
 		Sleep(200);
 		contatore++;
 	}
-	std::cout << "Tempo di attesa scaduto! Si prega l'operatore di posizionare meglio il pezzo!\n";
 	mainTimerMutex.lock();
 	main_timer = true;
 	mainTimerMutex.unlock();
 	threadTimeout = true;
+	if(!checker->getZeroZone_check())
+		std::cout << "Ingombro! Si prega l'operatore di liberare la zona di ispezione!\n";
+	else if(!checker->getFirstZone_check())
+		std::cout << "Tempo di attesa scaduto! Si prega l'operatore di posizionare meglio il pezzo!\n";
 };
 void alert_message(Checking* checker)
 {
@@ -64,8 +67,7 @@ void alert_message(Checking* checker)
 	{
 		if (main_timer)
 			timer = new std::thread(worker, checker);
-
-		
+				
 		main_timer = false;
 		
 	}
@@ -80,6 +82,7 @@ int main()
     std::cout << "USING WEBSOCKET VERSION: " << websocketpp::user_agent << "\n";
 		
 	bool checkFileMode = true;
+	bool safe_check = false;
 
 	std::thread aspettaESC([&]() {
 		// WAIT for the ESC key and then set the EscFlag to stop execution
@@ -102,41 +105,48 @@ int main()
     Processing* processer = new Processing();
 
 	std::string image_path = referenceImageFolder();
-	grabber->loadPath(image_path);
+	if (checkFileMode)
+		grabber->loadPath(image_path);
+
 	grabber->setImageFileMode(checkFileMode);
 
-	
 	while (checkEscRequest() == false)
 	{
-		/*
+		
 		if (checkFileMode)
 			EscFlag = true;
-			*/
+			
 		
 		do
 		{
 			cv::Mat imageGrabberWait = grabber->imageWait(3000);
 			checker->setImage(imageGrabberWait);
-			checker->ZonesChecker_beforeProcessing();
+			checker->ZonesChecker();
 			if (!checker->getBoolTimer() && !checker->getZeroZone_check())
 			{
 				std::cout << "Inserire un pezzo da analizzare\n";
 				Sleep(5000);				//Attesa che l'utente inserisca un pezzo sotto l'illuminatore
 			}
 			alert_message(checker);
-			if(threadTimeout)
+			if (threadTimeout)
+			{
 				timer->join();
+				safe_check = true;
+			}
 									
 
-		} while (!checker->getZeroZone_check());
+		} while (!checker->getZeroZone_check() || !checker->getFirstZone_check());
 
 		std::cout << "Pezzo in posizione!\n";
+		
 		
 
 	}
 
 	
 	std::cout << "\n\n[MAIN]: Applicazione finita\n\n";
+	if (!safe_check)
+		timer->join();
 	delete processer;
 	delete grabber;
 	delete checker;

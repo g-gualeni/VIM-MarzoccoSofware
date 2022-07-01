@@ -11,8 +11,6 @@ public:
 	Grabbing();
 	~Grabbing();
 
-	void start();
-	void stopAndWait();
 
 	bool isImageFileMode();
 	void setImageFileMode(bool fileMode);
@@ -20,6 +18,8 @@ public:
 
 	cv::Mat imageWait(int timeout_ms);
 private:
+	void start();
+	void stopAndWait();
 	bool stopFlag();
 	void run();
 

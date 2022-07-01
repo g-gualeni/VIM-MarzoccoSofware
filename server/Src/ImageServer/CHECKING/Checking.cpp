@@ -33,7 +33,7 @@ bool Checking::getFirstZone_check()
 	return m_FirstZone_check;
 }
 
-void Checking::ZonesChecker_beforeProcessing()
+void Checking::ZonesChecker()
 {
 	m_timer = false;
 	ElapsedTime ET;
@@ -119,10 +119,13 @@ void Checking::ZonesChecker_beforeProcessing()
 	//std::cout << "PIXEL BIANCHI CERCHIO: " << whitePixel_inside_circle << "\n";
 	//std::cout << "TOLLERANZA: " << theoryTollerance << "\n";
 
-	if (theoryTollerance > realTollerance)
+	if (theoryTollerance <= realTollerance)
 		m_ZeroZone_check = true;
 	else
+	{
 		m_timer = true; // Immagine con ingombro esterno 
+		return;
+	}
 
 	// ANALISI BORDO INTERNO 
 	
@@ -144,7 +147,7 @@ void Checking::ZonesChecker_beforeProcessing()
 		m_timer = true; // Immagine con ingombro interno 
 	
 
-	std::cout << ET.elapsed("[CHECKING]: checker ZeroZONE ") << "\n";
+	//std::cout << ET.elapsed("[CHECKING]: checker ZeroZONE ") << "\n";
 }
 
 

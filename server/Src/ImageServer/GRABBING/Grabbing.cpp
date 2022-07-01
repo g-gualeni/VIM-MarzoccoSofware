@@ -108,6 +108,7 @@ void Grabbing::run()
 			loadImagesFromCamera();
 		}
 	}
+	std::cout << typeid(*this).name() << "::" << __func__ << " END\n";
 }
 
 
