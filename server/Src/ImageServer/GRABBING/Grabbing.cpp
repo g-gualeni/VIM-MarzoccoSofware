@@ -87,6 +87,12 @@ cv::Mat Grabbing::imageWait(int timeout_ms)
 	return cv::Mat();
 }
 
+void Grabbing::setImageEmpty(bool imageMode)
+{
+	std::lock_guard<std::mutex> guard(m_imageMutex);
+	m_imageEmpty = imageMode;
+}
+
 
 bool Grabbing::stopFlag()
 {
@@ -147,6 +153,12 @@ void Grabbing::loadImagesFromDisk()
 
 void Grabbing::loadImagesFromCamera()
 {
+}
+
+bool Grabbing::isImageEmpty()
+{
+	std::lock_guard<std::mutex> guard(m_imageMutex);
+	return m_imageEmpty;
 }
 
 

@@ -17,6 +17,8 @@ public:
 	void loadPath(std::string imageFilePath);
 
 	cv::Mat imageWait(int timeout_ms);
+
+	void setImageEmpty(bool imageMode);
 private:
 	void start();
 	void stopAndWait();
@@ -25,6 +27,8 @@ private:
 
 	void loadImagesFromDisk();
 	void loadImagesFromCamera();
+
+	bool isImageEmpty();
 
 	
 private:
@@ -44,6 +48,7 @@ private:
 	bool m_imageEmpty = false;
 
 	cv::Mat m_image;
+	
 
 	
 
