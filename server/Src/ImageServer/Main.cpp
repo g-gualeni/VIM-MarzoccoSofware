@@ -116,10 +116,11 @@ int main()
 		if (checkFileMode)
 			EscFlag = true;
 			
-		
+		cv::Mat imageGrabberWait; 
+
 		do
 		{
-			cv::Mat imageGrabberWait = grabber->imageWait(3000);
+			imageGrabberWait = grabber->imageWait(3000);
 			checker->setImage(imageGrabberWait);
 			checker->ZonesChecker();
 			if (!checker->getBoolTimer() && !checker->getZeroZone_check())
@@ -138,7 +139,7 @@ int main()
 		} while (!checker->getZeroZone_check() || !checker->getFirstZone_check());
 
 		std::cout << "Pezzo in posizione!\n";
-		
+		processer->setImage(imageGrabberWait);
 		
 
 	}

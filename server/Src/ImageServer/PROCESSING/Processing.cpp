@@ -87,3 +87,40 @@ bool Processing::isImageOutputReady()
 	std::lock_guard<std::mutex> guard(m_imageOutputMutex);
 	return m_imageOutputReady;
 }
+
+void Processing::setImageOutput(cv::Mat image)
+{
+	std::lock_guard<std::mutex> guard(m_imageOutputMutex);
+	m_imageOutput = image;
+	m_imageOutputReady = true;
+}
+
+int Processing::getBlobs(cv::Mat image)
+{
+	cv::SimpleBlobDetector::Params params;
+
+	params.minThreshold = 10;
+	params.maxThreshold = 200;
+	params.filterByColor = true;
+	params.blobColor = 255;
+	params.filterByArea = true;
+	params.minArea = 100;
+	params.maxArea = FLT_MAX;
+	params.filterByCircularity = false;
+	params.filterByConvexity = false;
+	params.filterByInertia = false;
+
+
+	cv::Ptr<cv::SimpleBlobDetector> detector = cv::SimpleBlobDetector::create(params);
+
+	std::vector<cv::KeyPoint> keypoints;
+	detector->detect(image, keypoints); // IMAGE BINARIZZATA CON THRESHOLDING 200-255
+
+	cv::Mat imageDrawing;
+	cv::drawKeypoints(image, keypoints, imageDrawing, cv::Scalar(255, 0, 255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+	if (keypoints.size() <= 0)
+	{
+		return -1;
+	}
+	return keypoints.size();
+}

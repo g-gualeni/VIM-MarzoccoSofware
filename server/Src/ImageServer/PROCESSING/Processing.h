@@ -10,6 +10,7 @@ public:
 	void setImage(cv::Mat image);
 
 	cv::Mat imageOutputWait();
+	
 private:
 	void start();
 	void stopAndWait();
@@ -21,6 +22,9 @@ private:
 	void clearImageNew();
 
 	bool isImageOutputReady();
+	void setImageOutput(cv::Mat image);
+
+	int getBlobs(cv::Mat image);
 
 private:
 	std::mutex m_stop_mutex;
