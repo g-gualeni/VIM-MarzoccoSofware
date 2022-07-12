@@ -58,6 +58,15 @@ void Processing::run()
 			std::cout << " --> " << typeid(*this).name() << m_image.size() << " Nel processing\n";
 
 			// Altro codice di ispezione
+			
+			cv::Mat thresholding;
+			cv::threshold(m_image, thresholding, 200, 255, cv::THRESH_BINARY);
+
+			cv::Mat elaborateImage = cv::Mat::zeros(m_image.size(), CV_8UC3);
+			std::vector<cv::KeyPoint> keypointsVec = getBlobs(thresholding, elaborateImage);
+			cv::circle(m_image, { (int)keypointsVec[0].pt.x, (int)keypointsVec[0].pt.y }, keypointsVec[0].size, cv::Scalar(255, 0, 0), cv::FILLED);
+			clearImageNew();
+			setImageOutput(elaborateImage);
 		}
 		Sleep(1000);
 	}
@@ -95,15 +104,15 @@ void Processing::setImageOutput(cv::Mat image)
 	m_imageOutputReady = true;
 }
 
-int Processing::getBlobs(cv::Mat image)
+std::vector<cv::KeyPoint> Processing::getBlobs(cv::Mat imageInput, cv::Mat imageOutput)
 {
 	cv::SimpleBlobDetector::Params params;
 
 	params.minThreshold = 10;
-	params.maxThreshold = 200;
+	params.maxThreshold = 255;
 	params.filterByColor = true;
 	params.blobColor = 255;
-	params.filterByArea = true;
+	params.filterByArea = false;
 	params.minArea = 100;
 	params.maxArea = FLT_MAX;
 	params.filterByCircularity = false;
@@ -114,13 +123,15 @@ int Processing::getBlobs(cv::Mat image)
 	cv::Ptr<cv::SimpleBlobDetector> detector = cv::SimpleBlobDetector::create(params);
 
 	std::vector<cv::KeyPoint> keypoints;
-	detector->detect(image, keypoints); // IMAGE BINARIZZATA CON THRESHOLDING 200-255
+	detector->detect(imageInput, keypoints); // IMAGE BINARIZZATA CON THRESHOLDING 200-255
 
-	cv::Mat imageDrawing;
-	cv::drawKeypoints(image, keypoints, imageDrawing, cv::Scalar(255, 0, 255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+	
+	cv::drawKeypoints(imageInput, keypoints, imageOutput, cv::Scalar(255, 0, 255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
 	if (keypoints.size() <= 0)
 	{
-		return -1;
+		return std::vector<cv::KeyPoint>();
 	}
-	return keypoints.size();
+	return keypoints;
 }
+
+

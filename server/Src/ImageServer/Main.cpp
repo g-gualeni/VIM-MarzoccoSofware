@@ -140,13 +140,18 @@ int main()
 
 		std::cout << "Pezzo in posizione!\n";
 		processer->setImage(imageGrabberWait);
-		
+
+		cv::Mat outImage = processer->imageOutputWait();
+		checker->setZeroZone_check(false);
+		checker->setFirstZone_check(false);
+
+			
 
 	}
 
 	
 	std::cout << "\n\n[MAIN]: Applicazione finita\n\n";
-	if (!safe_check)
+	if (!safe_check && timer != nullptr)
 		timer->join();
 	delete processer;
 	delete grabber;

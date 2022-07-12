@@ -16,6 +16,9 @@ public:
 	bool getFirstZone_check();
 
 	void ZonesChecker();
+
+	void setZeroZone_check(bool zeroZone);
+	void setFirstZone_check(bool firstZone);
 	
 private:
 private:

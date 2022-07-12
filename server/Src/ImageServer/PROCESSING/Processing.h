@@ -24,7 +24,8 @@ private:
 	bool isImageOutputReady();
 	void setImageOutput(cv::Mat image);
 
-	int getBlobs(cv::Mat image);
+	std::vector<cv::KeyPoint> getBlobs(cv::Mat imageInput, cv::Mat imageOutput);
+		
 
 private:
 	std::mutex m_stop_mutex;

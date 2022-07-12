@@ -150,6 +150,16 @@ void Checking::ZonesChecker()
 	//std::cout << ET.elapsed("[CHECKING]: checker ZeroZONE ") << "\n";
 }
 
+void Checking::setZeroZone_check(bool zeroZone)
+{
+	m_ZeroZone_check = zeroZone;
+}
+
+void Checking::setFirstZone_check(bool firstZone)
+{
+	m_FirstZone_check = firstZone;
+}
+
 
 
 
