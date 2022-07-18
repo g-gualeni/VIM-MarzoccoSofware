@@ -89,12 +89,12 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\VIM-Lib\websocketpp-0.8.2;C:\VIM-Lib\boost_1_79_0;C:\VIM-Lib\nlohmann-json-3.10.5;C:\VIM-Lib\OpenCV-4.5.5\opencv\build\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VIM-Lib\Pylon\include;C:\VIM-Lib\websocketpp-0.8.2;C:\VIM-Lib\boost_1_79_0;C:\VIM-Lib\nlohmann-json-3.10.5;C:\VIM-Lib\OpenCV-4.5.5\opencv\build\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\VIM-Lib\OpenCV-4.5.5\opencv\build\x64\vc15\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\VIM-Lib\Pylon\lib\x64;C:\VIM-Lib\OpenCV-4.5.5\opencv\build\x64\vc15\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>opencv_world455d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -106,7 +106,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\VIM-Lib\websocketpp-0.8.2;C:\VIM-Lib\boost_1_79_0;C:\VIM-Lib\nlohmann-json-3.10.5;C:\VIM-Lib\OpenCV-4.5.5\opencv\build\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VIM-Lib\Pylon\include;C:\VIM-Lib\websocketpp-0.8.2;C:\VIM-Lib\boost_1_79_0;C:\VIM-Lib\nlohmann-json-3.10.5;C:\VIM-Lib\OpenCV-4.5.5\opencv\build\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -114,7 +114,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\VIM-Lib\OpenCV-4.5.5\opencv\build\x64\vc15\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\VIM-Lib\Pylon\lib\x64;C:\VIM-Lib\OpenCV-4.5.5\opencv\build\x64\vc15\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>opencv_world455.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -125,12 +125,12 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\VIM-Lib\websocketpp-0.8.2;C:\VIM-Lib\boost_1_79_0;C:\VIM-Lib\nlohmann-json-3.10.5;C:\VIM-Lib\OpenCV-4.5.5\opencv\build\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VIM-Lib\Pylon\include;C:\VIM-Lib\websocketpp-0.8.2;C:\VIM-Lib\boost_1_79_0;C:\VIM-Lib\nlohmann-json-3.10.5;C:\VIM-Lib\OpenCV-4.5.5\opencv\build\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\VIM-Lib\OpenCV-4.5.5\opencv\build\x64\vc15\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\VIM-Lib\Pylon\lib\x64;C:\VIM-Lib\OpenCV-4.5.5\opencv\build\x64\vc15\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>opencv_world455d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -142,7 +142,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\VIM-Lib\websocketpp-0.8.2;C:\VIM-Lib\boost_1_79_0;C:\VIM-Lib\nlohmann-json-3.10.5;C:\VIM-Lib\OpenCV-4.5.5\opencv\build\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VIM-Lib\Pylon\include;C:\VIM-Lib\websocketpp-0.8.2;C:\VIM-Lib\boost_1_79_0;C:\VIM-Lib\nlohmann-json-3.10.5;C:\VIM-Lib\OpenCV-4.5.5\opencv\build\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -150,7 +150,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\VIM-Lib\OpenCV-4.5.5\opencv\build\x64\vc15\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\VIM-Lib\Pylon\lib\x64;C:\VIM-Lib\OpenCV-4.5.5\opencv\build\x64\vc15\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>opencv_world455.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -162,6 +162,7 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="PROCESSING\Processing.cpp" />
     <ClCompile Include="UTILITY\ElapsedTime.cpp" />
+    <ClCompile Include="UTILITY\Grab_ChunkImage_Universal.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CHECKING\Checking.h" />
@@ -170,6 +171,7 @@
     <ClInclude Include="GUI\GUICommunication.h" />
     <ClInclude Include="PROCESSING\Processing.h" />
     <ClInclude Include="UTILITY\ElapsedTime.h" />
+    <ClInclude Include="UTILITY\Grab_ChunkImage_Universal.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

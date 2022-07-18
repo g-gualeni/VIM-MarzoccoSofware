@@ -81,7 +81,7 @@ int main()
     std::cout << "USING NLOHMANN JSON VERSION: " << NLOHMANN_JSON_VERSION_MAJOR << "." << NLOHMANN_JSON_VERSION_MINOR << "." << NLOHMANN_JSON_VERSION_PATCH << "\n";
     std::cout << "USING WEBSOCKET VERSION: " << websocketpp::user_agent << "\n";
 		
-	bool checkFileMode = true;
+	bool checkFileMode = false;
 	bool safe_check = false;
 
 	std::thread aspettaESC([&]() {

@@ -1,4 +1,5 @@
 #include "Grabbing.h"
+#include "..\UTILITY\Grab_ChunkImage_Universal.h"
 
 #include <iostream>
 #include <fstream>
@@ -153,6 +154,8 @@ void Grabbing::loadImagesFromDisk()
 
 void Grabbing::loadImagesFromCamera()
 {
+	m_image = Grab_ChunkImage_Universal::imageFromCamera(m_image);
+	system("PAUSE");
 }
 
 bool Grabbing::isImageEmpty()

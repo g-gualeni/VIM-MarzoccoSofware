@@ -36,6 +36,9 @@
     <ClCompile Include="UTILITY\ElapsedTime.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
+    <ClCompile Include="UTILITY\Grab_ChunkImage_Universal.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PROCESSING\Processing.h">
@@ -54,6 +57,9 @@
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="UTILITY\ElapsedTime.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="UTILITY\Grab_ChunkImage_Universal.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
   </ItemGroup>

@@ -4,7 +4,6 @@
 #include "..\UTILITY\ElapsedTime.h"
 
 
-
 Checking::Checking()
 {
 }
