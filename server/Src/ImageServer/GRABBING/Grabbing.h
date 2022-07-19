@@ -19,6 +19,7 @@ public:
 	cv::Mat imageWait(int timeout_ms);
 
 	void setImageEmpty(bool imageMode);
+	void setStopGrabbing(bool stop);
 private:
 	void start();
 	void stopAndWait();
@@ -29,6 +30,7 @@ private:
 	void loadImagesFromCamera();
 
 	bool isImageEmpty();
+	bool isStopped();
 
 	
 private:
@@ -48,6 +50,10 @@ private:
 	bool m_imageEmpty = false;
 
 	cv::Mat m_image;
+
+	std::mutex m_stop_grabbing;
+	bool m_stopGrabbing = false;
+	bool m_printMessage = false;
 	
 
 	

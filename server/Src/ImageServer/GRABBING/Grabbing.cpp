@@ -29,7 +29,7 @@ void Grabbing::stopAndWait()
 	m_stop_flag = true;
 	m_stop_mutex.unlock();
 	m_thread->join();
-	std::cout << typeid(*this).name() << "::" << __func__ << " END\n";
+	std::cout << "[GRABBING]" << typeid(*this).name() << "::" << __func__ << " END\n";
 }
 
 
@@ -94,6 +94,12 @@ void Grabbing::setImageEmpty(bool imageMode)
 	m_imageEmpty = imageMode;
 }
 
+void Grabbing::setStopGrabbing(bool stop)
+{
+	std::lock_guard<std::mutex> guard(m_stop_grabbing);
+	m_stopGrabbing = stop;
+}
+
 
 bool Grabbing::stopFlag()
 {
@@ -103,7 +109,7 @@ bool Grabbing::stopFlag()
 
 void Grabbing::run()
 {
-	std::cout << typeid(*this).name() << "::" << __func__ << " START\n";
+	std::cout << "[GRABBING]" << typeid(*this).name() << "::" << __func__ << " START\n";
 	while (!stopFlag())
 	{
 		if (isImageFileMode())
@@ -113,9 +119,10 @@ void Grabbing::run()
 		else
 		{
 			loadImagesFromCamera();
+							
 		}
 	}
-	std::cout << typeid(*this).name() << "::" << __func__ << " END\n";
+	std::cout << "[GRABBING]" << typeid(*this).name() << "::" << __func__ << " END\n";
 }
 
 
@@ -154,14 +161,38 @@ void Grabbing::loadImagesFromDisk()
 
 void Grabbing::loadImagesFromCamera()
 {
-	m_image = Grab_ChunkImage_Universal::imageFromCamera(m_image);
-	system("PAUSE");
+	if (!isStopped())
+	{
+		if (!m_printMessage)
+		{
+			std::cout << "[GRABBING]" << typeid(*this).name() << "::" << __func__ << " ACQUISISCO\n";
+			m_printMessage = true;
+		}
+		m_image = Grab_ChunkImage_Universal::imageFromCamera(m_image);
+		std::lock_guard<std::mutex> imageGuard(m_imageMutex);
+		m_imageReady.notify_all();  // Unlock all waiting threds
+		m_imageEmpty = false;
+	}
+	else
+		if (m_printMessage)
+		{
+			std::cout << "[GRABBING]" << typeid(*this).name() << "::" << __func__ << " STOPPED\n";
+			m_printMessage = false;
+
+		}
+	
 }
 
 bool Grabbing::isImageEmpty()
 {
 	std::lock_guard<std::mutex> guard(m_imageMutex);
 	return m_imageEmpty;
+}
+
+bool Grabbing::isStopped()
+{
+	std::lock_guard<std::mutex> guard(m_stop_grabbing);
+	return m_stopGrabbing;
 }
 
 

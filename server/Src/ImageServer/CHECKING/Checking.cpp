@@ -42,11 +42,12 @@ void Checking::ZonesChecker()
 	if (m_image.empty())
 		return;
 
-	cv::Mat workedImage;
-	cv::cvtColor(m_image, workedImage, cv::COLOR_BGR2GRAY);
+	// LE DUE SEGUENTI RIGHE SOLO SE L'IMMAGINE E' LETTA DA FILE E NON DA CAMERA
+	//cv::Mat workedImage;
+	//cv::cvtColor(m_image, workedImage, cv::COLOR_BGR2GRAY);
 
 	cv::Mat thresholding;
-	cv::threshold(workedImage, thresholding, 200, 255, cv::THRESH_BINARY);
+	cv::threshold(m_image, thresholding, 200, 255, cv::THRESH_BINARY);
 
 	std::vector<std::vector<cv::Point> > contours;
 	std::vector<cv::Vec4i> hierarchy;
@@ -122,6 +123,8 @@ void Checking::ZonesChecker()
 		m_ZeroZone_check = true;
 	else
 	{
+		m_ZeroZone_check = false;
+		m_FirstZone_check = false;
 		m_timer = true; // Immagine con ingombro esterno 
 		return;
 	}
@@ -143,7 +146,11 @@ void Checking::ZonesChecker()
 	if (distanceBewteenCenters + circles[pezzo].radius() < circleLimit.radius())
 		m_FirstZone_check = true;
 	else
+	{
+		m_FirstZone_check = false;
 		m_timer = true; // Immagine con ingombro interno 
+		return;
+	}
 	
 
 	//std::cout << ET.elapsed("[CHECKING]: checker ZeroZONE ") << "\n";

@@ -49,13 +49,13 @@ cv::Mat Processing::imageOutputWait()
 
 void Processing::run()
 {
-	std::cout << typeid(*this).name() << "::" << __func__ << " START\n";
+	std::cout << "[PROCESSING]" << typeid(*this).name() << "::" << __func__ << " START\n";
 	while (!stopFlag())
 	{
 		if (isImageNew())
 		{
-			std::cout << " --> " << typeid(*this).name() << "::" << __func__ << " running\n";
-			std::cout << " --> " << typeid(*this).name() << m_image.size() << " Nel processing\n";
+			std::cout << " --> "  << "[PROCESSING]" << typeid(*this).name() << "::" << __func__ << " RUNNING\n";
+			std::cout << " --> " << "[PROCESSING]" << typeid(*this).name() << m_image.size() << " NEL PROCESSING\n";
 
 			// Altro codice di ispezione
 			
@@ -70,7 +70,7 @@ void Processing::run()
 		}
 		Sleep(1000);
 	}
-	std::cout << typeid(*this).name() << "::" << __func__ << " END\n";
+	std::cout << "[PROCESSING]" << typeid(*this).name() << "::" << __func__ << " END\n";
 }
 
 bool Processing::stopFlag()

@@ -22,12 +22,14 @@ public:
     {
         CIntegerParameter chunkTimestamp(ptrGrabResult->GetChunkDataNodeMap(), "ChunkTimestamp");
 
+        /*
         if (chunkTimestamp.IsReadable())
             cout << "OnImageGrabbed: TimeStamp (Result) accessed via node map: " << chunkTimestamp.GetValue() << endl;
 
        
         if (ptrGrabResult->ChunkTimestamp.IsReadable())
             cout << "OnImageGrabbed: TimeStamp (Result) accessed via result member: " << ptrGrabResult->ChunkTimestamp.GetValue() << endl;
+            */
     }
 };
 
@@ -44,11 +46,6 @@ cv::Mat Grab_ChunkImage_Universal::imageFromCamera(cv::Mat grabImage)
     {
         
         CBaslerUniversalInstantCamera camera( CTlFactory::GetInstance().CreateFirstDevice());
-
-        
-        cout << "Using device " << camera.GetDeviceInfo().GetModelName() << endl;
-
-        
         camera.RegisterImageEventHandler( new CSampleImageEventHandler, RegistrationMode_Append, Cleanup_Delete);
         camera.Open();
 
@@ -73,11 +70,7 @@ cv::Mat Grab_ChunkImage_Universal::imageFromCamera(cv::Mat grabImage)
         CBaslerUniversalGrabResultPtr ptrGrabResult;
         camera.RetrieveResult(5000, ptrGrabResult, TimeoutHandling_ThrowException);
 
-        cout << "GrabSucceeded: " << ptrGrabResult->GrabSucceeded() << endl;
-        cout << "SizeX: " << ptrGrabResult->GetWidth() << endl;
-        cout << "SizeY: " << ptrGrabResult->GetHeight() << endl;
-        
-        unsigned short *pImageBuffer = (unsigned short*) ptrGrabResult->GetBuffer();
+       unsigned short *pImageBuffer = (unsigned short*) ptrGrabResult->GetBuffer();
         
         if (PayloadType_ChunkData != ptrGrabResult->GetPayloadType())
         {
@@ -89,28 +82,16 @@ cv::Mat Grab_ChunkImage_Universal::imageFromCamera(cv::Mat grabImage)
             throw RUNTIME_EXCEPTION( "Image was damaged!");
         }
 
-            
-        if (ptrGrabResult->ChunkTimestamp.IsReadable())
-        {
-             cout << "TimeStamp (Result): " << ptrGrabResult->ChunkTimestamp.GetValue() << endl;
-        }
-
-        if (ptrGrabResult->ChunkFramecounter.IsReadable())
-        {
-             cout << "FrameCounter (Result): " << ptrGrabResult->ChunkFramecounter.GetValue() << endl;
-        }
-            
-        cout << endl;
-        
+          
         
         cv::Mat tmpImage = cv::Mat(ptrGrabResult->GetHeight(), ptrGrabResult->GetWidth(), CV_8U, pImageBuffer);
         tmpImage.copyTo(grabImage);
         
-        // Disable chunk mode.
+        
         
         camera.StopGrabbing();
         camera.ChunkModeActive.SetValue(false);
-        //camera.Close();
+        camera.Close();
     }
     catch (const GenericException &e)
     {
@@ -120,7 +101,7 @@ cv::Mat Grab_ChunkImage_Universal::imageFromCamera(cv::Mat grabImage)
     }
         
     PylonTerminate(); 
-    return grabImage;
+     return grabImage;
     
     
 }

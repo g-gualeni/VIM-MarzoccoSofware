@@ -19,7 +19,7 @@ bool EscFlag = false;
 
 std::mutex mainTimerMutex;
 bool main_timer = true;
-bool threadTimeout = false;
+bool thread_created = false;
 std::thread* timer = nullptr;
 
 bool checkEscRequest()
@@ -45,7 +45,8 @@ auto worker = [](Checking* checker) {
 			mainTimerMutex.lock();
 			main_timer = true;
 			mainTimerMutex.unlock();
-			threadTimeout = true;
+			thread_created = true;
+			std::cout << "[MAIN] TIMER THREAD TERMINATO PRIMA DEL TIMEOUT!!! " << "\n";
 			return;
 		}
 		Sleep(200);
@@ -54,11 +55,12 @@ auto worker = [](Checking* checker) {
 	mainTimerMutex.lock();
 	main_timer = true;
 	mainTimerMutex.unlock();
-	threadTimeout = true;
+	thread_created = true;
+	std::cout << "[MAIN] THREAD TERMINATO!!! TIMEOUT SCADUTO " << "\n";
 	if(!checker->getZeroZone_check())
-		std::cout << "Ingombro! Si prega l'operatore di liberare la zona di ispezione!\n";
+		std::cout << "[MAIN] Ingombro! Si prega l'operatore di liberare la zona di ispezione!\n";
 	else if(!checker->getFirstZone_check())
-		std::cout << "Tempo di attesa scaduto! Si prega l'operatore di posizionare meglio il pezzo!\n";
+		std::cout << "[MAIN] Tempo di attesa scaduto! Si prega l'operatore di posizionare meglio il pezzo!\n";
 };
 void alert_message(Checking* checker)
 {
@@ -66,7 +68,9 @@ void alert_message(Checking* checker)
 	if (checker->getBoolTimer())
 	{
 		if (main_timer)
+		{
 			timer = new std::thread(worker, checker);
+		}
 				
 		main_timer = false;
 		
@@ -79,10 +83,10 @@ int main()
     std::cout << "USING CV VERSION: " << cv::getVersionString() << "\n";
     std::cout << "USING BOOST VERSION: " << BOOST_LIB_VERSION << "\n";
     std::cout << "USING NLOHMANN JSON VERSION: " << NLOHMANN_JSON_VERSION_MAJOR << "." << NLOHMANN_JSON_VERSION_MINOR << "." << NLOHMANN_JSON_VERSION_PATCH << "\n";
-    std::cout << "USING WEBSOCKET VERSION: " << websocketpp::user_agent << "\n";
+    std::cout << "USING WEBSOCKET VERSION: " << websocketpp::user_agent << "\n\n";
 		
 	bool checkFileMode = false;
-	bool safe_check = false;
+	bool saveCheck = false;
 
 	std::thread aspettaESC([&]() {
 		// WAIT for the ESC key and then set the EscFlag to stop execution
@@ -123,36 +127,54 @@ int main()
 			imageGrabberWait = grabber->imageWait(3000);
 			checker->setImage(imageGrabberWait);
 			checker->ZonesChecker();
+			//std::cout << "GET ZERO CHECK DOPO ISPEZIONE: " << checker->getZeroZone_check() << "\n";
+			//std::cout << "GET BOOL TIMER DOPO ISPEZIONE: " << checker->getZeroZone_check() << "\n";
+			//std::cout << "GET FIRST CHECK DOPO ISPEZIONE: " << checker->getFirstZone_check() << "\n";
+			//std::cout << "MAIN TIMER: " << main_timer << "\n";
+						
 			if (!checker->getBoolTimer() && !checker->getZeroZone_check())
 			{
-				std::cout << "Inserire un pezzo da analizzare\n";
+				std::cout << "[MAIN] Inserire un pezzo da analizzare\n";
 				Sleep(5000);				//Attesa che l'utente inserisca un pezzo sotto l'illuminatore
 			}
 			alert_message(checker);
-			if (threadTimeout)
-			{
+			/*
+			if (thread_created)
 				timer->join();
-				safe_check = true;
-			}
-									
+			*/		
+							
+			//system("PAUSE");
+												
 
 		} while (!checker->getZeroZone_check() || !checker->getFirstZone_check());
 
-		std::cout << "Pezzo in posizione!\n";
+		std::cout << "\n[MAIN] Pezzo in posizione!\n\n";
+		grabber->setStopGrabbing(true);
 		processer->setImage(imageGrabberWait);
 
 		cv::Mat outImage = processer->imageOutputWait();
-		checker->setZeroZone_check(false);
-		checker->setFirstZone_check(false);
+		bool firstPrint = true;
+		grabber->setStopGrabbing(false);
+		do
+		{
+			checker->ZonesChecker();
+			if (firstPrint)
+				std::cout << "[MAIN] ATTESA DELL'EVENTO DI INGROMBRO " << "\n";
+			firstPrint = false;
 
+		} while (checker->getZeroZone_check());
+		
+		std::cout << "[MAIN] INGROMBRO AVVENUTO. PROSSIMA ACQUISIZIONE " << "\n";
+		checker->setFirstZone_check(false);
+		
+		
 			
 
 	}
 
 	
 	std::cout << "\n\n[MAIN]: Applicazione finita\n\n";
-	if (!safe_check && timer != nullptr)
-		timer->join();
+	//timer->join();
 	delete processer;
 	delete grabber;
 	delete checker;
