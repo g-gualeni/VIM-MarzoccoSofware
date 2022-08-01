@@ -127,24 +127,13 @@ int main()
 			imageGrabberWait = grabber->imageWait(3000);
 			checker->setImage(imageGrabberWait);
 			checker->ZonesChecker();
-			//std::cout << "GET ZERO CHECK DOPO ISPEZIONE: " << checker->getZeroZone_check() << "\n";
-			//std::cout << "GET BOOL TIMER DOPO ISPEZIONE: " << checker->getZeroZone_check() << "\n";
-			//std::cout << "GET FIRST CHECK DOPO ISPEZIONE: " << checker->getFirstZone_check() << "\n";
-			//std::cout << "MAIN TIMER: " << main_timer << "\n";
-						
 			if (!checker->getBoolTimer() && !checker->getZeroZone_check())
 			{
 				std::cout << "[MAIN] Inserire un pezzo da analizzare\n";
-				Sleep(5000);				//Attesa che l'utente inserisca un pezzo sotto l'illuminatore
+				Sleep(10000);				//Attesa che l'utente inserisca un pezzo sotto l'illuminatore
 			}
 			alert_message(checker);
-			/*
-			if (thread_created)
-				timer->join();
-			*/		
-							
-			//system("PAUSE");
-												
+														
 
 		} while (!checker->getZeroZone_check() || !checker->getFirstZone_check());
 
@@ -165,16 +154,12 @@ int main()
 		} while (checker->getZeroZone_check());
 		
 		std::cout << "[MAIN] INGROMBRO AVVENUTO. PROSSIMA ACQUISIZIONE " << "\n";
+		checker->setZeroZone_check(false);
 		checker->setFirstZone_check(false);
 		
-		
-			
-
 	}
-
-	
+		
 	std::cout << "\n\n[MAIN]: Applicazione finita\n\n";
-	//timer->join();
 	delete processer;
 	delete grabber;
 	delete checker;

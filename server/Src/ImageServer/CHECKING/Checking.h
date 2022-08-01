@@ -30,6 +30,7 @@ private:
 	bool m_timer = false;
 
 	bool m_FirstZone_check = false;
+	
 
 	
 };

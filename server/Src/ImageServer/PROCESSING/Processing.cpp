@@ -108,8 +108,6 @@ std::vector<cv::KeyPoint> Processing::getBlobs(cv::Mat imageInput, cv::Mat image
 {
 	cv::SimpleBlobDetector::Params params;
 
-	params.minThreshold = 10;
-	params.maxThreshold = 255;
 	params.filterByColor = true;
 	params.blobColor = 255;
 	params.filterByArea = false;
