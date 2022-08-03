@@ -1,5 +1,4 @@
 #include "Processing.h"
-
 #include <Windows.h>
 
 Processing::Processing()
@@ -63,9 +62,9 @@ void Processing::run()
 			cv::threshold(m_image, thresholding, 200, 255, cv::THRESH_BINARY);
 
 			cv::Mat elaborateImage = cv::Mat::zeros(m_image.size(), CV_8UC3);
-			std::vector<cv::KeyPoint> keypointsVec = getBlobs(thresholding, elaborateImage);
-			cv::circle(m_image, { (int)keypointsVec[0].pt.x, (int)keypointsVec[0].pt.y }, keypointsVec[0].size, cv::Scalar(255, 0, 0), cv::FILLED);
+			
 			clearImageNew();
+			// OUTPUT PDF, NOT IMAGE
 			setImageOutput(elaborateImage);
 		}
 		Sleep(1000);
@@ -104,32 +103,55 @@ void Processing::setImageOutput(cv::Mat image)
 	m_imageOutputReady = true;
 }
 
-std::vector<cv::KeyPoint> Processing::getBlobs(cv::Mat imageInput, cv::Mat imageOutput)
+std::vector<GeometricCircle> Processing::findCountours(cv::Mat imageThreshold)
 {
-	cv::SimpleBlobDetector::Params params;
+	std::vector<std::vector<cv::Point> > contours;
+	std::vector<cv::Vec4i> hierarchy;
+	cv::findContours(imageThreshold, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
 
-	params.filterByColor = true;
-	params.blobColor = 255;
-	params.filterByArea = false;
-	params.minArea = 100;
-	params.maxArea = FLT_MAX;
-	params.filterByCircularity = false;
-	params.filterByConvexity = false;
-	params.filterByInertia = false;
-
-
-	cv::Ptr<cv::SimpleBlobDetector> detector = cv::SimpleBlobDetector::create(params);
-
-	std::vector<cv::KeyPoint> keypoints;
-	detector->detect(imageInput, keypoints); // IMAGE BINARIZZATA CON THRESHOLDING 200-255
-
-	
-	cv::drawKeypoints(imageInput, keypoints, imageOutput, cv::Scalar(255, 0, 255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-	if (keypoints.size() <= 0)
+	std::vector<std::vector<cv::Point> > holesContours;
+	std::vector<std::vector<cv::Point> > outerContours;
+	for (size_t i = 0; i < contours.size(); i++)
 	{
-		return std::vector<cv::KeyPoint>();
+		if (contours[i].size() > 20) // PARAMETRO 20 DA TENERE FISSO
+			outerContours.push_back(contours.at(i));
 	}
-	return keypoints;
+
+	double dim = DBL_MAX;
+	int minIndex = 0;
+	
+	for (size_t i = 0; i < outerContours.size(); i++)
+	{
+		if (dim < outerContours[i].size())
+			minIndex = i;
+
+	}
+	for (size_t i = 0; i < contours.size(); i++)
+	{
+		if (contours[i].size() < 20) // PARAMETRO 20 DA TENERE FISSO
+			holesContours.push_back(contours.at(i));
+	}
+	std::vector<std::vector<cv::Point> > contours_poly(holesContours.size());
+	std::vector<cv::Point2f>center(holesContours.size());
+	std::vector<float>radius(holesContours.size());
+	std::vector<GeometricCircle> circles;
+
+	cv::Mat drawingContours = cv::Mat::zeros(imageThreshold.size(), CV_8UC3);
+	cv::Mat drawingCircles = cv::Mat::zeros(imageThreshold.size(), CV_8UC3);
+	cv::Mat1b contour_mask(imageThreshold.rows, imageThreshold.cols, uchar(0));
+	for (size_t i = 0; i < holesContours.size(); i++)
+	{
+		approxPolyDP(cv::Mat(holesContours[i]), contours_poly[i], 3, false);
+		cv::minEnclosingCircle((cv::Mat)contours_poly[i], center[i], radius[i]);
+		drawContours(drawingContours, contours_poly, i, cv::Scalar(255, 0, 255), 5, 8, std::vector<cv::Vec4i>(), 0, cv::Point());
+		drawContours(contour_mask, contours_poly, i, cv::Scalar(255), cv::FILLED);
+		circle(drawingCircles, center[i], radius[i], cv::Scalar(0, 255, 255), 5, 8, 0);
+		if (!center.empty())
+			circles.push_back(GeometricCircle(center[i], radius[i]));
+	}
+	return circles;
 }
+
+
 
 

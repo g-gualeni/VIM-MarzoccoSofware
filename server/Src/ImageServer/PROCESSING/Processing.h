@@ -1,4 +1,5 @@
 #pragma once
+#include "..\GEOMETRY\GeometricCircle.h"
 #include <mutex>
 #include <thread>
 #include <opencv2/opencv.hpp>
@@ -24,7 +25,7 @@ private:
 	bool isImageOutputReady();
 	void setImageOutput(cv::Mat image);
 
-	std::vector<cv::KeyPoint> getBlobs(cv::Mat imageInput, cv::Mat imageOutput);
+	std::vector<GeometricCircle> findCountours(cv::Mat imageInput);
 		
 
 private:

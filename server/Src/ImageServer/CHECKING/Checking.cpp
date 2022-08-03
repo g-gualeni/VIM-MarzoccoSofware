@@ -42,10 +42,6 @@ void Checking::ZonesChecker()
 	if (m_image.empty())
 		return;
 
-	// LE DUE SEGUENTI RIGHE SOLO SE L'IMMAGINE E' LETTA DA FILE E NON DA CAMERA
-	//cv::Mat workedImage;
-	//cv::cvtColor(m_image, workedImage, cv::COLOR_BGR2GRAY);
-
 	cv::Mat thresholding;
 	cv::threshold(m_image, thresholding, 200, 255, cv::THRESH_BINARY);
 
