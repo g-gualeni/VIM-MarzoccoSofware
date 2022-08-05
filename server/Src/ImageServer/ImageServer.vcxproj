@@ -106,7 +106,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\VIM-Lib\Pylon\include;C:\VIM-Lib\websocketpp-0.8.2;C:\VIM-Lib\boost_1_79_0;C:\VIM-Lib\nlohmann-json-3.10.5;C:\VIM-Lib\OpenCV-4.5.5\opencv\build\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VIM-Lib\Python\Python39\include;C:\VIM-Lib\Python\Python39\Lib\site-packages\numpy\core\include;C:\VIM-Lib\Pylon\include;C:\VIM-Lib\websocketpp-0.8.2;C:\VIM-Lib\boost_1_79_0;C:\VIM-Lib\nlohmann-json-3.10.5;C:\VIM-Lib\OpenCV-4.5.5\opencv\build\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -114,8 +114,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\VIM-Lib\Pylon\lib\x64;C:\VIM-Lib\OpenCV-4.5.5\opencv\build\x64\vc15\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opencv_world455.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\VIM-Lib\Pylon\lib\x64;C:\VIM-Lib\Python\Python39\libs;C:\VIM-Lib\OpenCV-4.5.5\opencv\build\x64\vc15\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>C:\VIM-Lib\Python\Python39\libs\python39.lib;opencv_world455.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -142,7 +142,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\VIM-Lib\Pylon\include;C:\VIM-Lib\websocketpp-0.8.2;C:\VIM-Lib\boost_1_79_0;C:\VIM-Lib\nlohmann-json-3.10.5;C:\VIM-Lib\OpenCV-4.5.5\opencv\build\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VIM-Lib\Python\Python39\include;C:\VIM-Lib\Python\Python39\Lib\site-packages\numpy\core\include;C:\VIM-Lib\Pylon\include;C:\VIM-Lib\websocketpp-0.8.2;C:\VIM-Lib\boost_1_79_0;C:\VIM-Lib\nlohmann-json-3.10.5;C:\VIM-Lib\OpenCV-4.5.5\opencv\build\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -150,8 +150,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\VIM-Lib\Pylon\lib\x64;C:\VIM-Lib\OpenCV-4.5.5\opencv\build\x64\vc15\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opencv_world455.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\VIM-Lib\Pylon\lib\x64;C:\VIM-Lib\Python\Python39\libs;C:\VIM-Lib\OpenCV-4.5.5\opencv\build\x64\vc15\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>C:\VIM-Lib\Python\Python39\libs\python39.lib;opencv_world455.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -163,6 +163,7 @@
     <ClCompile Include="PROCESSING\Processing.cpp" />
     <ClCompile Include="UTILITY\ElapsedTime.cpp" />
     <ClCompile Include="UTILITY\Grab_ChunkImage_Universal.cpp" />
+    <ClCompile Include="UTILITY\Math.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CHECKING\Checking.h" />
@@ -172,6 +173,8 @@
     <ClInclude Include="PROCESSING\Processing.h" />
     <ClInclude Include="UTILITY\ElapsedTime.h" />
     <ClInclude Include="UTILITY\Grab_ChunkImage_Universal.h" />
+    <ClInclude Include="UTILITY\Math.h" />
+    <ClInclude Include="UTILITY\matplotlibcpp.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

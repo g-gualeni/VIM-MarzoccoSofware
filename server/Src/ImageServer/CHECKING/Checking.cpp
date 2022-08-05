@@ -133,7 +133,7 @@ void Checking::ZonesChecker()
 
 	double radiusFactor = radius[biggest] * 15 / 100;
 	int radiusCircleLimit = radius[biggest] - radiusFactor + 1; //Arrotondamento al prossimo integer 
-	GeometricCircle circleLimit = { center[biggest], radiusCircleLimit };
+	GeometricCircle circleLimit = { center[biggest], (float) radiusCircleLimit };
 	circle(drawingCircles, circleLimit.centerAsCvPoint(), radiusCircleLimit, cv::Scalar(255, 0, 255), 5, 8, 0);
 
 	double centers_delta_X = (double)circleLimit.centerAsCvPoint().x - (double)circles[pezzo].centerAsCvPoint().x;

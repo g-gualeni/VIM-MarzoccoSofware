@@ -25,7 +25,9 @@ private:
 	bool isImageOutputReady();
 	void setImageOutput(cv::Mat image);
 
-	std::vector<GeometricCircle> findCountours(cv::Mat imageInput);
+	cv::Mat masked(cv::Mat realImage, cv::Mat thresholdImage);
+	std::vector<float> findRadiusHolesCountours(cv::Mat imageInput);
+	GeometricCircle findFittingCircle(cv::Mat imageInput);
 		
 
 private:

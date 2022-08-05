@@ -4,7 +4,7 @@ GeometricCircle::GeometricCircle()
 {
 }
 
-GeometricCircle::GeometricCircle(const cv::Point& center, int radius)
+GeometricCircle::GeometricCircle(const cv::Point& center, float radius)
 {
 	m_point = center;
 	m_radius = radius;

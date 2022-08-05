@@ -1,5 +1,9 @@
 #include "Processing.h"
+#include "..\UTILITY\Math.h"
+#include "..\UTILITY\\matplotlibcpp.h"
 #include <Windows.h>
+
+namespace plt = matplotlibcpp;
 
 Processing::Processing()
 {
@@ -58,16 +62,25 @@ void Processing::run()
 
 			// Altro codice di ispezione
 			
-			cv::Mat thresholding;
-			cv::threshold(m_image, thresholding, 200, 255, cv::THRESH_BINARY);
+			cv::Mat thresholdingImage;
+			cv::threshold(m_image, thresholdingImage, 200, 255, cv::THRESH_BINARY);
 
-			cv::Mat elaborateImage = cv::Mat::zeros(m_image.size(), CV_8UC3);
+			cv::Mat thresholdingMask = masked(m_image, thresholdingImage);
+			cv::threshold(thresholdingMask, thresholdingMask, 110, 255, cv::THRESH_BINARY);
+
+			GeometricCircle fittingCircle = findFittingCircle(thresholdingImage);
+			std::vector<float> radiusHoles = findRadiusHolesCountours(thresholdingMask);
 			
-			clearImageNew();
+			float mm_conversion = 35.0 / fittingCircle.radius();  // 35 E' il raggio del filtro 21g 
+			std::cout << "MM CONVERSION: " << mm_conversion << "\n";
+			plt::plot(radiusHoles, "bo");
+			plt::show();
 			// OUTPUT PDF, NOT IMAGE
-			setImageOutput(elaborateImage);
+			clearImageNew();
+			setImageOutput(thresholdingMask);
 		}
 		Sleep(1000);
+
 	}
 	std::cout << "[PROCESSING]" << typeid(*this).name() << "::" << __func__ << " END\n";
 }
@@ -103,13 +116,77 @@ void Processing::setImageOutput(cv::Mat image)
 	m_imageOutputReady = true;
 }
 
-std::vector<GeometricCircle> Processing::findCountours(cv::Mat imageThreshold)
+cv::Mat Processing::masked(cv::Mat realImage, cv::Mat imageThreshold)
 {
+	GeometricCircle fittingCircle = findFittingCircle(imageThreshold);
+	
+	// CREATE A MASK 
+	cv::Mat mask(realImage.size(), realImage.type());
+	mask.setTo(0);
+	cv::Point center_mask(fittingCircle.centerAsCvPoint().x, fittingCircle.centerAsCvPoint().y);
+	const int radius_mask = fittingCircle.radius();
+	circle(mask, center_mask, radius_mask, 255, cv::FILLED);
+
+	cv::Mat elaborateHolesImage(realImage.size(), realImage.type());
+	elaborateHolesImage.setTo(0); 
+	realImage.copyTo(elaborateHolesImage, mask);
+	return elaborateHolesImage;
+}
+
+std::vector<float> Processing::findRadiusHolesCountours(cv::Mat imageThreshold)
+{
+
 	std::vector<std::vector<cv::Point> > contours;
 	std::vector<cv::Vec4i> hierarchy;
 	cv::findContours(imageThreshold, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
 
 	std::vector<std::vector<cv::Point> > holesContours;
+	
+	for (size_t i = 0; i < contours.size(); i++)
+	{
+		if (contours[i].size() < 20) // PARAMETRO 20 DA TENERE FISSO
+			holesContours.push_back(contours.at(i));
+	}
+	
+	std::vector<std::vector<cv::Point> > contours_poly(holesContours.size());
+	std::vector<cv::Point2f>center(holesContours.size());
+	std::vector<float>radius(holesContours.size());
+	std::vector<GeometricCircle> holes;
+
+	cv::Mat drawingHoles = cv::Mat::zeros(imageThreshold.size(), CV_8UC3);
+	
+	for (size_t i = 0; i < holesContours.size(); i++)
+	{
+		approxPolyDP(cv::Mat(holesContours[i]), contours_poly[i], 3, false);
+		cv::minEnclosingCircle((cv::Mat)contours_poly[i], center[i], radius[i]);
+		
+		circle(drawingHoles, center[i], radius[i], cv::Scalar(255, 255, 255), 5,8,0);
+		if (!center.empty())
+			holes.push_back(GeometricCircle(center[i], radius[i]));
+	}
+
+	float maxHoleRadius = Math::takeMax(radius);
+	float minHoleRadius = Math::takeMin(radius);
+	int indexMaxRadius = Math::index(maxHoleRadius, radius);
+	int indexMinRadius = Math::index(minHoleRadius, radius);
+
+	std::cout << "RAGGIO MINIMO: " << minHoleRadius << "\n";
+	std::cout << "RAGGIO MASSIMO: " << maxHoleRadius << "\n";
+	std::cout << "INDICE RAGGIO MINIMO: " << indexMinRadius << "\n";
+	std::cout << "INDICE RAGGIO MASSIMO: " << indexMaxRadius << "\n";
+
+	circle(drawingHoles, center[indexMinRadius], radius[indexMinRadius], cv::Scalar(0, 255, 0), 5, 8, 0);
+	circle(drawingHoles, center[indexMaxRadius], radius[indexMaxRadius], cv::Scalar(255, 0, 0), 5, 8, 0);
+	
+	return radius;
+}
+
+GeometricCircle Processing::findFittingCircle(cv::Mat imageThreshold)
+{
+	std::vector<std::vector<cv::Point> > contours;
+	std::vector<cv::Vec4i> hierarchy;
+	cv::findContours(imageThreshold, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
+
 	std::vector<std::vector<cv::Point> > outerContours;
 	for (size_t i = 0; i < contours.size(); i++)
 	{
@@ -117,39 +194,31 @@ std::vector<GeometricCircle> Processing::findCountours(cv::Mat imageThreshold)
 			outerContours.push_back(contours.at(i));
 	}
 
-	double dim = DBL_MAX;
-	int minIndex = 0;
-	
+	std::vector<std::vector<cv::Point> > contours_poly(outerContours.size());
+	std::vector<cv::Point2f>center(outerContours.size());
+	std::vector<float>radius(outerContours.size());
+	std::vector<GeometricCircle> outerCircles;
+
+	cv::Mat drawingOuterCircles = cv::Mat::zeros(imageThreshold.size(), CV_8UC3);
+		
 	for (size_t i = 0; i < outerContours.size(); i++)
 	{
-		if (dim < outerContours[i].size())
+		approxPolyDP(cv::Mat(outerContours[i]), contours_poly[i], 3, false);
+		cv::minEnclosingCircle((cv::Mat)contours_poly[i], center[i], radius[i]);
+		circle(drawingOuterCircles, center[i], radius[i], cv::Scalar(0, 255, 255), 5,8,0);
+		if (!center.empty())
+			outerCircles.push_back(GeometricCircle(center[i], radius[i]));
+	}
+	double dim = DBL_MAX;
+	int minIndex = 0;
+
+	for (size_t i = 0; i < outerCircles.size(); i++)
+	{
+		if (dim > outerCircles[i].radius() && outerCircles[i].radius() > 200) // 200 PARAMETRO FISSO PER INDIVIDUARE I DUE CERCHI PIU GRANDI
 			minIndex = i;
 
 	}
-	for (size_t i = 0; i < contours.size(); i++)
-	{
-		if (contours[i].size() < 20) // PARAMETRO 20 DA TENERE FISSO
-			holesContours.push_back(contours.at(i));
-	}
-	std::vector<std::vector<cv::Point> > contours_poly(holesContours.size());
-	std::vector<cv::Point2f>center(holesContours.size());
-	std::vector<float>radius(holesContours.size());
-	std::vector<GeometricCircle> circles;
-
-	cv::Mat drawingContours = cv::Mat::zeros(imageThreshold.size(), CV_8UC3);
-	cv::Mat drawingCircles = cv::Mat::zeros(imageThreshold.size(), CV_8UC3);
-	cv::Mat1b contour_mask(imageThreshold.rows, imageThreshold.cols, uchar(0));
-	for (size_t i = 0; i < holesContours.size(); i++)
-	{
-		approxPolyDP(cv::Mat(holesContours[i]), contours_poly[i], 3, false);
-		cv::minEnclosingCircle((cv::Mat)contours_poly[i], center[i], radius[i]);
-		drawContours(drawingContours, contours_poly, i, cv::Scalar(255, 0, 255), 5, 8, std::vector<cv::Vec4i>(), 0, cv::Point());
-		drawContours(contour_mask, contours_poly, i, cv::Scalar(255), cv::FILLED);
-		circle(drawingCircles, center[i], radius[i], cv::Scalar(0, 255, 255), 5, 8, 0);
-		if (!center.empty())
-			circles.push_back(GeometricCircle(center[i], radius[i]));
-	}
-	return circles;
+	return outerCircles[minIndex];
 }
 
 
