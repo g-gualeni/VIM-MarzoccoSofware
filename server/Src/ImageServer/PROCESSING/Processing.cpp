@@ -1,9 +1,13 @@
 #include "Processing.h"
 #include "..\UTILITY\Math.h"
 #include "..\UTILITY\\matplotlibcpp.h"
+#include "boost/math/statistics/univariate_statistics.hpp"
+
 #include <Windows.h>
+#include <cmath>
 
 namespace plt = matplotlibcpp;
+namespace bst = boost::math::statistics;
 
 Processing::Processing()
 {
@@ -72,9 +76,21 @@ void Processing::run()
 			std::vector<float> radiusHoles = findRadiusHolesCountours(thresholdingMask);
 			
 			float mm_conversion = 35.0 / fittingCircle.radius();  // 35 E' il raggio del filtro 21g 
+			float maxHoleRadius = Math::takeMax(radiusHoles);
+			float minHoleRadius = Math::takeMin(radiusHoles);
+			int indexMaxRadius = Math::index(maxHoleRadius, radiusHoles);
+			int indexMinRadius = Math::index(minHoleRadius, radiusHoles);
+
 			std::cout << "MM CONVERSION: " << mm_conversion << "\n";
-			plt::plot(radiusHoles, "bo");
-			plt::show();
+			std::cout << "RAGGIO MINIMO: " << minHoleRadius * mm_conversion << "\n";
+			std::cout << "RAGGIO MASSIMO: " << maxHoleRadius * mm_conversion << "\n";
+			std::cout << "INDICE RAGGIO MINIMO: " << indexMinRadius << "\n";
+			std::cout << "INDICE RAGGIO MASSIMO: " << indexMaxRadius << "\n";
+			
+			float toll = minHoleRadius / maxHoleRadius * 100;
+			std::cout << "TOLLERANZA: " << toll << "\n";
+			
+			plot_gaussian(radiusHoles);
 			// OUTPUT PDF, NOT IMAGE
 			clearImageNew();
 			setImageOutput(thresholdingMask);
@@ -169,12 +185,7 @@ std::vector<float> Processing::findRadiusHolesCountours(cv::Mat imageThreshold)
 	float minHoleRadius = Math::takeMin(radius);
 	int indexMaxRadius = Math::index(maxHoleRadius, radius);
 	int indexMinRadius = Math::index(minHoleRadius, radius);
-
-	std::cout << "RAGGIO MINIMO: " << minHoleRadius << "\n";
-	std::cout << "RAGGIO MASSIMO: " << maxHoleRadius << "\n";
-	std::cout << "INDICE RAGGIO MINIMO: " << indexMinRadius << "\n";
-	std::cout << "INDICE RAGGIO MASSIMO: " << indexMaxRadius << "\n";
-
+	
 	circle(drawingHoles, center[indexMinRadius], radius[indexMinRadius], cv::Scalar(0, 255, 0), 5, 8, 0);
 	circle(drawingHoles, center[indexMaxRadius], radius[indexMaxRadius], cv::Scalar(255, 0, 0), 5, 8, 0);
 	
@@ -219,6 +230,29 @@ GeometricCircle Processing::findFittingCircle(cv::Mat imageThreshold)
 
 	}
 	return outerCircles[minIndex];
+}
+
+void Processing::plot_gaussian(std::vector<float> radius)
+{
+	int dim = radius.size();
+	std::vector<double> x(dim);
+	std::vector<double> density(dim);
+
+	double mu = bst::mean(radius); // MEDIA
+	double varianza = bst::variance(radius);
+	double sigma = sqrt(varianza); // DEVIAZIONE STANDARD 
+
+	double min_range = 0.0;
+	double max_range = mu * 2;
+
+	for (int i = 0; i <= dim; i++)
+	{
+		x[i] = (max_range - min_range) / dim * i;
+		density[i] = 1.0 / (sigma * sqrt(2.0 * 3.14)) * exp(-(pow((x[i] - mu) / sigma, 2) / 2.0));
+	}
+
+	plt::plot(x, density, "g");
+	plt::show();
 }
 
 

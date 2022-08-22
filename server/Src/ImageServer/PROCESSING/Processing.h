@@ -28,6 +28,8 @@ private:
 	cv::Mat masked(cv::Mat realImage, cv::Mat thresholdImage);
 	std::vector<float> findRadiusHolesCountours(cv::Mat imageInput);
 	GeometricCircle findFittingCircle(cv::Mat imageInput);
+
+	void plot_gaussian(std::vector<float> radius);
 		
 
 private:
