@@ -106,7 +106,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\VIM-Lib\Python\Python39\include;C:\VIM-Lib\Python\Python39\Lib\site-packages\numpy\core\include;C:\VIM-Lib\Pylon\include;C:\VIM-Lib\websocketpp-0.8.2;C:\VIM-Lib\boost_1_79_0;C:\VIM-Lib\nlohmann-json-3.10.5;C:\VIM-Lib\OpenCV-4.5.5\opencv\build\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VIM-Lib\AsposePDF\include;C:\VIM-Lib\Python\Python39\include;C:\VIM-Lib\Python\Python39\Lib\site-packages\numpy\core\include;C:\VIM-Lib\Pylon\include;C:\VIM-Lib\websocketpp-0.8.2;C:\VIM-Lib\boost_1_79_0;C:\VIM-Lib\nlohmann-json-3.10.5;C:\VIM-Lib\OpenCV-4.5.5\opencv\build\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -114,7 +114,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\VIM-Lib\Pylon\lib\x64;C:\VIM-Lib\Python\Python39\libs;C:\VIM-Lib\OpenCV-4.5.5\opencv\build\x64\vc15\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\VIM-Lib\AsposePDF\lib;C:\VIM-Lib\Pylon\lib\x64;C:\VIM-Lib\Python\Python39\libs;C:\VIM-Lib\OpenCV-4.5.5\opencv\build\x64\vc15\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>C:\VIM-Lib\Python\Python39\libs\python39.lib;opencv_world455.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -142,7 +142,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\VIM-Lib\Python\Python39\include;C:\VIM-Lib\Python\Python39\Lib\site-packages\numpy\core\include;C:\VIM-Lib\Pylon\include;C:\VIM-Lib\websocketpp-0.8.2;C:\VIM-Lib\boost_1_79_0;C:\VIM-Lib\nlohmann-json-3.10.5;C:\VIM-Lib\OpenCV-4.5.5\opencv\build\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VIM-Lib\AsposePDF\include;C:\VIM-Lib\Python\Python39\include;C:\VIM-Lib\Python\Python39\Lib\site-packages\numpy\core\include;C:\VIM-Lib\Pylon\include;C:\VIM-Lib\websocketpp-0.8.2;C:\VIM-Lib\boost_1_79_0;C:\VIM-Lib\nlohmann-json-3.10.5;C:\VIM-Lib\OpenCV-4.5.5\opencv\build\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -150,7 +150,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\VIM-Lib\Pylon\lib\x64;C:\VIM-Lib\Python\Python39\libs;C:\VIM-Lib\OpenCV-4.5.5\opencv\build\x64\vc15\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\VIM-Lib\AsposePDF\lib;C:\VIM-Lib\Pylon\lib\x64;C:\VIM-Lib\Python\Python39\libs;C:\VIM-Lib\OpenCV-4.5.5\opencv\build\x64\vc15\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>C:\VIM-Lib\Python\Python39\libs\python39.lib;opencv_world455.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -171,12 +171,25 @@
     <ClInclude Include="GRABBING\Grabbing.h" />
     <ClInclude Include="GUI\GUICommunication.h" />
     <ClInclude Include="PROCESSING\Processing.h" />
+    <ClInclude Include="UTILITY\Aspose.Pdf.h" />
     <ClInclude Include="UTILITY\ElapsedTime.h" />
     <ClInclude Include="UTILITY\Grab_ChunkImage_Universal.h" />
     <ClInclude Include="UTILITY\Math.h" />
     <ClInclude Include="UTILITY\matplotlibcpp.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\packages\CodePorting.Translator.Cs2Cpp.Framework.22.8.0\build\native\CodePorting.Translator.Cs2Cpp.Framework.targets" Condition="Exists('..\packages\CodePorting.Translator.Cs2Cpp.Framework.22.8.0\build\native\CodePorting.Translator.Cs2Cpp.Framework.targets')" />
+    <Import Project="..\packages\Aspose.PDF.Cpp.22.8.0\build\native\aspose.pdf.cpp.targets" Condition="Exists('..\packages\Aspose.PDF.Cpp.22.8.0\build\native\aspose.pdf.cpp.targets')" />
   </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>Questo progetto fa riferimento a uno o più pacchetti NuGet che non sono presenti in questo computer. Usare lo strumento di ripristino dei pacchetti NuGet per scaricarli. Per altre informazioni, vedere http://go.microsoft.com/fwlink/?LinkID=322105. Il file mancante è {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\CodePorting.Translator.Cs2Cpp.Framework.22.8.0\build\native\CodePorting.Translator.Cs2Cpp.Framework.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\CodePorting.Translator.Cs2Cpp.Framework.22.8.0\build\native\CodePorting.Translator.Cs2Cpp.Framework.targets'))" />
+    <Error Condition="!Exists('..\packages\Aspose.PDF.Cpp.22.8.0\build\native\aspose.pdf.cpp.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Aspose.PDF.Cpp.22.8.0\build\native\aspose.pdf.cpp.targets'))" />
+  </Target>
 </Project>

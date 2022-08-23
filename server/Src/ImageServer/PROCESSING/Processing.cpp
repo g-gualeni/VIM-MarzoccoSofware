@@ -2,12 +2,14 @@
 #include "..\UTILITY\Math.h"
 #include "..\UTILITY\\matplotlibcpp.h"
 #include "boost/math/statistics/univariate_statistics.hpp"
-
+#include "..\UTILITY\Aspose.Pdf.h"
 #include <Windows.h>
 #include <cmath>
 
 namespace plt = matplotlibcpp;
 namespace bst = boost::math::statistics;
+
+using namespace Aspose::Pdf;
 
 Processing::Processing()
 {
@@ -92,6 +94,10 @@ void Processing::run()
 			
 			plot_gaussian(radiusHoles);
 			// OUTPUT PDF, NOT IMAGE
+
+			// Create document
+			
+
 			clearImageNew();
 			setImageOutput(thresholdingMask);
 		}
