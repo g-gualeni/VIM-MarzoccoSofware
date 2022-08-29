@@ -77,21 +77,20 @@ void Processing::run()
 			std::vector<float> radiusHoles = findRadiusHolesCountours(thresholdingMask);
 			
 			float mm_conversion = 35.0 / fittingCircle.radius();  // 35 E' il raggio del filtro 21g 
-			float maxHoleRadius = Math::takeMax(radiusHoles);
-			float minHoleRadius = Math::takeMin(radiusHoles);
-			int indexMaxRadius = Math::index(maxHoleRadius, radiusHoles);
-			int indexMinRadius = Math::index(minHoleRadius, radiusHoles);
+			std::vector<float> diamHolesConverted = radiusConversion(radiusHoles, mm_conversion);
+
+			float maxHoleDiam = Math::takeMax(diamHolesConverted);
+			float minHoleDiam = Math::takeMin(diamHolesConverted);
+			int indexMaxDiam = Math::index(maxHoleDiam, diamHolesConverted);
+			int indexMinDiam = Math::index(minHoleDiam, diamHolesConverted);
 
 			std::cout << "MM CONVERSION: " << mm_conversion << "\n";
-			std::cout << "RAGGIO MINIMO: " << minHoleRadius * mm_conversion << "\n";
-			std::cout << "RAGGIO MASSIMO: " << maxHoleRadius * mm_conversion << "\n";
-			std::cout << "INDICE RAGGIO MINIMO: " << indexMinRadius << "\n";
-			std::cout << "INDICE RAGGIO MASSIMO: " << indexMaxRadius << "\n";
-			
-			float toll = minHoleRadius / maxHoleRadius * 100;
-			std::cout << "TOLLERANZA: " << toll << "\n";
-			
-			plot_gaussian(radiusHoles);
+			std::cout << "DIAMETRO MINIMO: " << minHoleDiam << "\n";
+			std::cout << "DIAMETRO MASSIMO: " << maxHoleDiam << "\n";
+			std::cout << "INDICE DIAMETRO MINIMO: " << indexMinDiam << "\n";
+			std::cout << "INDICE DIAMETRO MASSIMO: " << indexMaxDiam << "\n";
+												
+			plot_gaussian(diamHolesConverted, maxHoleDiam, minHoleDiam);
 			// OUTPUT PDF, NOT IMAGE
 
 			// Create document
@@ -106,10 +105,8 @@ void Processing::run()
 			ts->set_FontStyle(Aspose::Pdf::Text::FontStyles::Italic);
 			paragraps->Add(text);
 			paragraps->Add(System::MakeObject<Aspose::Pdf::Text::TextFragment>(u"This example shows how to create a PDF with text using Aspose.PDF for C++."));
-			doc->Save(u"Example1.pdf");
+			doc->Save(u"Example1.pdf");			
 			
-			
-
 			clearImageNew();
 			setImageOutput(thresholdingMask);
 		}
@@ -250,22 +247,33 @@ GeometricCircle Processing::findFittingCircle(cv::Mat imageThreshold)
 	return outerCircles[minIndex];
 }
 
-void Processing::plot_gaussian(std::vector<float> radius)
+std::vector<float> Processing::radiusConversion(std::vector<float> radiusVector, float conversion)
 {
-	int dim = radius.size();
+	std::vector<float> diamHoles;
+	for (size_t i = 0; i < radiusVector.size(); i++)
+		diamHoles.push_back(radiusVector.at(i) * conversion * 2);
+
+	return diamHoles;
+}
+
+void Processing::plot_gaussian(std::vector<float> diam, float maxHoleDiam, float minHoleDiam)
+{
+	int dim = diam.size();
 	std::vector<double> x(dim);
 	std::vector<double> density(dim);
 
-	double mu = bst::mean(radius); // MEDIA
-	double varianza = bst::variance(radius);
-	double sigma = sqrt(varianza); // DEVIAZIONE STANDARD 
+	float mu = bst::mean(diam); // MEDIA
+	float varianza = bst::variance(diam);
+	float sigma = sqrt(varianza); // DEVIAZIONE STANDARD 
 
-	double min_range = 0.0;
-	double max_range = mu * 2;
+	float tolleranza = 0.33 * 40 / 100;
+	float min_range = 0.33 - tolleranza;
+	float max_range = 0.33 + tolleranza;
 
 	for (int i = 0; i <= dim; i++)
 	{
-		x[i] = (max_range - min_range) / dim * i;
+		x[i] = (max_range - min_range) / 10 * i; // 10 PER ORA COSTANTE FISSA, 10 INTERVALLINI 
+
 		density[i] = 1.0 / (sigma * sqrt(2.0 * 3.14)) * exp(-(pow((x[i] - mu) / sigma, 2) / 2.0));
 	}
 

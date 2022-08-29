@@ -29,7 +29,8 @@ private:
 	std::vector<float> findRadiusHolesCountours(cv::Mat imageInput);
 	GeometricCircle findFittingCircle(cv::Mat imageInput);
 
-	void plot_gaussian(std::vector<float> radius);
+	std::vector<float> radiusConversion(std::vector<float> radiusVector, float conversion);
+	void plot_gaussian(std::vector<float> radius, float max, float min);
 		
 
 private:
