@@ -9,7 +9,6 @@
 namespace plt = matplotlibcpp;
 namespace bst = boost::math::statistics;
 
-using namespace Aspose::Pdf;
 
 Processing::Processing()
 {
@@ -96,6 +95,19 @@ void Processing::run()
 			// OUTPUT PDF, NOT IMAGE
 
 			// Create document
+			auto doc = System::MakeObject<Aspose::Pdf::Document>();
+			auto pages = doc->get_Pages();
+			pages->Add();
+			auto page = pages->idx_get(1);// Numbering of pages starts from index 1.
+			auto paragraps = page->get_Paragraphs();
+			auto text = System::MakeObject<Aspose::Pdf::Text::TextFragment>(u"Hello World");
+			auto ts = text->get_TextState();
+			ts->set_FontSize(16);
+			ts->set_FontStyle(Aspose::Pdf::Text::FontStyles::Italic);
+			paragraps->Add(text);
+			paragraps->Add(System::MakeObject<Aspose::Pdf::Text::TextFragment>(u"This example shows how to create a PDF with text using Aspose.PDF for C++."));
+			doc->Save(u"Example1.pdf");
+			
 			
 
 			clearImageNew();
