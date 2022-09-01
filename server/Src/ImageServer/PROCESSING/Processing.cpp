@@ -71,7 +71,7 @@ void Processing::run()
 			cv::threshold(m_image, thresholdingImage, 200, 255, cv::THRESH_BINARY);
 
 			cv::Mat thresholdingMask = masked(m_image, thresholdingImage);
-			cv::threshold(thresholdingMask, thresholdingMask, 110, 255, cv::THRESH_BINARY);
+			cv::threshold(thresholdingMask, thresholdingMask, 102, 255, cv::THRESH_BINARY);
 
 			GeometricCircle fittingCircle = findFittingCircle(thresholdingImage);
 			std::vector<float> radiusHoles = findRadiusHolesCountours(thresholdingMask);
@@ -89,8 +89,10 @@ void Processing::run()
 			std::cout << "DIAMETRO MASSIMO: " << maxHoleDiam << "\n";
 			std::cout << "INDICE DIAMETRO MINIMO: " << indexMinDiam << "\n";
 			std::cout << "INDICE DIAMETRO MASSIMO: " << indexMaxDiam << "\n";
+			std::cout << "NUMERO FORI: " << diamHolesConverted.size() << "\n";
 												
-			plot_gaussian(diamHolesConverted, maxHoleDiam, minHoleDiam);
+			real_plot_gaussian(diamHolesConverted, minHoleDiam, maxHoleDiam);
+			// 
 			// OUTPUT PDF, NOT IMAGE
 
 			// Create document
@@ -184,14 +186,16 @@ std::vector<float> Processing::findRadiusHolesCountours(cv::Mat imageThreshold)
 	std::vector<float>radius(holesContours.size());
 	std::vector<GeometricCircle> holes;
 
-	cv::Mat drawingHoles = cv::Mat::zeros(imageThreshold.size(), CV_8UC3);
+	cv::Mat drawingHoles;
+	cv::cvtColor(imageThreshold, drawingHoles, cv::COLOR_GRAY2BGR);
+	
 	
 	for (size_t i = 0; i < holesContours.size(); i++)
 	{
 		approxPolyDP(cv::Mat(holesContours[i]), contours_poly[i], 3, false);
 		cv::minEnclosingCircle((cv::Mat)contours_poly[i], center[i], radius[i]);
 		
-		circle(drawingHoles, center[i], radius[i], cv::Scalar(255, 255, 255), 5,8,0);
+		circle(drawingHoles, center[i], radius[i], cv::Scalar(255, 255, 0), 5,8,0);
 		if (!center.empty())
 			holes.push_back(GeometricCircle(center[i], radius[i]));
 	}
@@ -256,6 +260,7 @@ std::vector<float> Processing::radiusConversion(std::vector<float> radiusVector,
 	return diamHoles;
 }
 
+/*
 void Processing::plot_gaussian(std::vector<float> diam, float maxHoleDiam, float minHoleDiam)
 {
 	int dim = diam.size();
@@ -266,9 +271,10 @@ void Processing::plot_gaussian(std::vector<float> diam, float maxHoleDiam, float
 	float varianza = bst::variance(diam);
 	float sigma = sqrt(varianza); // DEVIAZIONE STANDARD 
 
-	float tolleranza = 0.33 * 40 / 100;
+	float tolleranza = 0.33 * 10 / 100;
 	float min_range = 0.33 - tolleranza;
 	float max_range = 0.33 + tolleranza;
+	
 
 	for (int i = 0; i <= dim; i++)
 	{
@@ -277,8 +283,55 @@ void Processing::plot_gaussian(std::vector<float> diam, float maxHoleDiam, float
 		density[i] = 1.0 / (sigma * sqrt(2.0 * 3.14)) * exp(-(pow((x[i] - mu) / sigma, 2) / 2.0));
 	}
 
-	plt::plot(x, density, "g");
+	plt::plot(density, "g");
 	plt::show();
+}
+*/
+
+void Processing::real_plot_gaussian(std::vector<float> diam, float minHoleDiam, float maxHoleDiam)
+{
+	std::sort(diam.begin(), diam.end());
+	int dim = 5; // NUMERO INTERVALLI 
+	std::vector<int> pieceNumber;
+	std::vector<float> x;
+
+	float min_range = minHoleDiam;
+	float max_range = maxHoleDiam;
+	float gap = (maxHoleDiam-minHoleDiam) / dim; 
+	x.push_back(min_range);
+	for (size_t i = 0; i < dim; i++)
+		x.push_back(x.at(i) + gap);
+
+	
+
+	int counter = 0;
+	for (size_t i = 0; i < x.size(); i++)
+	{
+		
+		for (size_t j = 0; j < diam.size(); j++)
+		{
+			if (i == (x.size() - 1))
+				break;
+
+			if (diam.at(j) >= x.at(i) && diam.at(j) <= x.at(i + 1))
+				counter++;
+			
+			
+		}
+		pieceNumber.push_back(counter);
+		counter = 0;
+	}
+	
+	
+	std::cout << "\n\n";
+	for (size_t i = 0; i < pieceNumber.size(); i++)
+		std::cout << "Numero pezzi: " << pieceNumber.at(i) << "\n";
+
+	plt::bar(pieceNumber, "g");
+	plt::show();
+
+	
+	
 }
 
 

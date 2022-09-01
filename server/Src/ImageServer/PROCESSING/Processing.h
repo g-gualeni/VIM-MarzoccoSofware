@@ -31,6 +31,7 @@ private:
 
 	std::vector<float> radiusConversion(std::vector<float> radiusVector, float conversion);
 	void plot_gaussian(std::vector<float> radius, float max, float min);
+	void real_plot_gaussian(std::vector<float> radius, float min, float max);
 		
 
 private:

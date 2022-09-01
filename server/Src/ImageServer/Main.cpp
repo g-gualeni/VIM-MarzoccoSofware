@@ -130,7 +130,7 @@ int main()
 			if (!checker->getBoolTimer() && !checker->getZeroZone_check())
 			{
 				std::cout << "[MAIN] Inserire un pezzo da analizzare\n";
-				Sleep(10000);				//Attesa che l'utente inserisca un pezzo sotto l'illuminatore
+				Sleep(5000);				//Attesa che l'utente inserisca un pezzo sotto l'illuminatore
 			}
 			alert_message(checker);
 														
